@@ -68,6 +68,8 @@ class BotManager:
 		if self.__Horoscope["horoscopes"][Zodiac]["love"] != None: Text += self.__Horoscope["horoscopes"][Zodiac]["love"] + "\n\n"
 		if self.__Horoscope["horoscopes"][Zodiac]["career"] != None: Text += self.__Horoscope["horoscopes"][Zodiac]["career"] + "\n\n"
 		if self.__Horoscope["horoscopes"][Zodiac]["health"] != None: Text += self.__Horoscope["horoscopes"][Zodiac]["health"] + "\n\n"
+		# Добавление прощания.
+		Text += "Удачного вам дня\!"
 
 		return Text
 
@@ -91,13 +93,24 @@ class BotManager:
 			
 		return IsAdmin
 	
-	# Регистрирует пользователя в качестве администратора.
-	def register(self, UserID: int):
-		# Добавление ID пользователя в список администраторов.
-		self.__Settings["admins"].append(UserID)
-		# Сохранение настроек.
-		self.__SaveSettings()
-	
+	# Регистрирует пользователя.
+	def register(self, User: telebot.types.User):
+		# Конвертирование ID пользователя.
+		UserID = str(User.id) 
+		# Буфер данных пользователей.
+		Bufer = {
+			"first-name": User.first_name,
+			"last-name": User.last_name,
+			"username": User.username,
+			"premium": User.is_premium,
+			"active": True,
+			"admin": False
+		}
+		# Добавление записи о пользователе.
+		if UserID not in self.__Users["users"].keys(): self.__Users["users"][UserID] = Bufer
+		# Сохранение базы данных.
+		WriteJSON("Data/Users.json", self.__Users)
+
 	# Задаёт тип ожидаемого сообщения.
 	def setExpectedType(self, Type: ExpectedMessageTypes):
 		self.__ExpectedType = Type

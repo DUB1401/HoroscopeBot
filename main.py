@@ -57,7 +57,7 @@ if CommandDataStruct != None and "update" == CommandDataStruct.Name:
 	Updater.update()
 	
 # Запуск Telegram бота.
-else:	
+else:
 	# Токен для работы определенного бота телегамм.
 	Bot = telebot.TeleBot(Settings["token"])
 	# Менеджер данных бота.
@@ -66,10 +66,13 @@ else:
 	# Обработка команды: start.
 	@Bot.message_handler(commands = ["start"])
 	def Command(Message: types.Message):
+		# Регистрация пользователя.
+		BotProcessor.register(Message.from_user)
 		# Отправка сообщения: приветствие.
 		Bot.send_message(
 			Message.chat.id,
-			"Выберите свой знак зодиака, чтобы получить гороскоп на сегодня.",
+			"*Добро пожаловать в «Гороскоп дня»\!*\n\nСамый большой и популярный бот\-астролог в Telegram\.\n\nВыбирай свой знак зодиака и смело смотри прогноз на день\!",
+			parse_mode = "MarkdownV2",
 			reply_markup = BuildZodiacMenu()
 		)
 		
