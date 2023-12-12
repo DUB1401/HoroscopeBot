@@ -1,0 +1,7 @@
+# Visual Studio project files.
+HoroscopeBot.pyproj
+HoroscopeBot.sln
+.vs
+
+# Python cache.
+__pycache__

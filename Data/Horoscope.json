@@ -1,0 +1,77 @@
+{
+	"date": null,
+	"horoscopes": {
+		"Овен": {
+			"symbol": "♈",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Телец": {
+			"symbol": "♉",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Близнецы": {
+			"symbol": "♊",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Рак": {
+			"symbol": "♋",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Лев": {
+			"symbol": "♌",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Дева": {
+			"symbol": "♍",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Весы": {
+			"symbol": "♎",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Скорпион": {
+			"symbol": "♏",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Стрелец": {
+			"symbol": "♐",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Козерог": {
+			"symbol": "♑",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Водолей": {
+			"symbol": "♒",
+			"love": null,
+			"career": null,
+			"health": null
+		},
+		"Рыбы": {
+			"symbol": "♓",
+			"love": null,
+			"career": null,
+			"health": null
+		}
+	}
+}
