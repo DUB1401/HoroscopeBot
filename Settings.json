@@ -1,6 +1,10 @@
 {
 	"token": "",
 	"model": "gpt4",
-	"active": true,
+	"timezone": "Europe/Moscow",
+	"premium": false,
+	"password": "1234",
+	"message": "Здравствуйте!",
+	"collect-media": false,
 	"delay": 1
 }

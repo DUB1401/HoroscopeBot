@@ -10,28 +10,27 @@ from Source.Functions import EscapeCharacters
 class Horoscope:
 	
 	# Возвращает гороскоп.
-	def __GetHoroscope(self, Zodiac: str) -> str | None:
+	def __GetHoroscope(self, Zodiac: str) -> str:
 		# Вывод в консоль: прогресс.
-		print(f"Updating horoscope for zodiac: \"{Zodiac}\"...", end = "")
+		print(f"Updating horoscope for zodiac: \"{Zodiac}\".")
 		# Приведение знака зодиака к нижнему регистру.
 		Zodiac = Zodiac.lower()
 		# Гороскоп.
-		Text = None
+		Text = ""
 		# Составление запроса.
 		Request = f"Напиши гороскоп на сегодняшний день для знака зодиака {Zodiac}. Гороскоп должен подходить для публикации и не содержать лишней информации, а также обязательно иметь следующие категории: личная жизнь, карьера, здоровье."
-		# Выполнение запроса.
-		Response = Client.create_completion(self.__Settings["model"], Request)
-		# Интерпретация запроса.
-		Text = Response.encode("utf-8").decode("unicode-escape")
 		
-		# Если произошла ошибка.
-		if "Извините" in Text:
-			# Вывод в консоль: не удалось.
-			print(" Error!")
-			
-		else:
+		# Пока не получен удовлетворительный результат.
+		while "личная жизнь:" not in Text.lower() or "карьера:" not in Text.lower() or "здоровье:" not in Text.lower():
+			# Выполнение запроса.
+			Response = Client.create_completion(self.__Settings["model"], Request)
+			# Интерпретация запроса.
+			Text = Response.encode("utf-8").decode("unicode-escape")
 			# Вывод в консоль: завершение.
-			print(" Done.")
+			print("Requesting...")
+			
+		# Вывод в консоль: завершение.
+		print("Done.")
 		
 		return Text
 	
@@ -42,41 +41,49 @@ class Horoscope:
 		#==========================================================================================#
 		# Глобальные настройки.
 		self.__Settings = Settings.copy()
+		# Чтение файла гороскопа.
+		self.__Horoscope = ReadJSON("Data/Horoscope.json")
+		
+	# Возвращает строковую дату.
+	def getDate(self) -> str:
+		return self.__Horoscope["date"]
+
+	# Возвращает тексты гороскопов.
+	def getHoroscopes(self) -> dict:
+		return self.__Horoscope["horoscopes"]
 	
 	# Обновляет гороскопы на сегодняшний день.
 	def update(self):
-		# Чтение данных гороскопа.
-		Data = ReadJSON("Data/Horoscope.json")
 		# Запись даты обновления.
-		Data["date"] = str(datetime.datetime.now().strftime("%d.%m.%Y"))
+		self.__Horoscope["date"] = str(datetime.datetime.now().strftime("%d.%m.%Y"))
 		
 		# Для каждого знака зодиака.
-		for Key in Data["horoscopes"].keys():
+		for Key in self.__Horoscope["horoscopes"].keys():
 			# Получение гороскопа.
 			Text = self.__GetHoroscope(Key)
 			
 			# Для каждого абзаца.
-			for Paragraph in Text.split("\n"):
+			for Paragraph in Text.split("\n\n"):
 				# Очистка краевых пробельных символов.
 				Bufer = EscapeCharacters(Paragraph.strip())
 				
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Личная жизнь"):
 					# Заполнение поля личной жизни.
-					Data["horoscopes"][Key]["love"] = Bufer.replace("Личная жизнь:", "💞 _*Личная жизнь:*_")
+					self.__Horoscope["horoscopes"][Key]["love"] = Bufer.replace("Личная жизнь:", "💞 _*Личная жизнь:*_")
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Карьера"):
 					# Заполнение поля личной жизни.
-					Data["horoscopes"][Key]["career"] = Bufer.replace("Карьера:", "💼 _*Карьера:*_")
+					self.__Horoscope["horoscopes"][Key]["career"] = Bufer.replace("Карьера:", "💼 _*Карьера:*_")
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Здоровье"):
 					# Заполнение поля личной жизни.
-					Data["horoscopes"][Key]["health"] = Bufer.replace("Здоровье:", "💉 _*Здоровье:*_")
+					self.__Horoscope["horoscopes"][Key]["health"] = Bufer.replace("Здоровье:", "💉 _*Здоровье:*_")
 
 			# Выжидание интервала.
 			sleep(self.__Settings["delay"])
 
-		# Запись данных.
-		WriteJSON("Data/Horoscope.json", Data)
+		# Сохранение данных.
+		WriteJSON("Data/Horoscope.json", self.__Horoscope)
