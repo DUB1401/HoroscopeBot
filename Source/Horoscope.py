@@ -1,10 +1,10 @@
-from dublib.Methods import ReadJSON, WriteJSON
+from dublib.Methods import ReadJSON, RemoveRecurringSubstrings, WriteJSON
+from Source.Functions import EscapeCharacters
 from freeGPT import Client
 from time import sleep
 
 import datetime
-
-from Source.Functions import EscapeCharacters
+import g4f
 
 # Генератор гороскопов.
 class Horoscope:
@@ -18,17 +18,29 @@ class Horoscope:
 		# Гороскоп.
 		Text = ""
 		# Составление запроса.
-		Request = f"Напиши гороскоп на сегодняшний день для знака зодиака {Zodiac}. Гороскоп должен подходить для публикации и не содержать лишней информации, а также обязательно иметь следующие категории: личная жизнь, карьера, здоровье."
+		Request = f"Составь уникальный гороскоп на сегодняшний день для знака зодиака {Zodiac}. Гороскоп должен подходить для публикации и не содержать лишней информации, а также обязательно иметь следующие категории: личная жизнь, карьера, здоровье! Сделай его максимально красивым и неповторимым."
 		
 		# Пока не получен удовлетворительный результат.
 		while "личная жизнь:" not in Text.lower() or "карьера:" not in Text.lower() or "здоровье:" not in Text.lower():
-			# Выполнение запроса.
-			Response = Client.create_completion(self.__Settings["model"], Request)
-			# Интерпретация запроса.
-			Text = Response.encode("utf-8").decode("unicode-escape")
-			# Вывод в консоль: завершение.
-			print("Requesting...")
+			# Вывод в консоль: выполнение запроса.
+			print(f"Requesting by " + self.__Settings["mode"] + "...")
 			
+			# Если используется библиотека freeGPT.
+			if self.__Settings["mode"] == "freeGPT":
+				# Выполнение запроса.
+				Response = Client.create_completion(self.__Settings["model"], Request)
+				# Интерпретация запроса.
+				Text = Response.encode("utf-8").decode("unicode-escape")
+			
+			# Если используется библиотека g4f.
+			elif self.__Settings["mode"] == "g4f":
+				# Выполнение запроса.
+				Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, messages = [{"role": "user", "content": Request}])
+				
+			else:
+				# Выброс исключения.
+				raise Exception("Unsupported GPT-4 lib: \"" + self.__Settings["mode"] + "\".")
+				
 		# Вывод в консоль: завершение.
 		print("Done.")
 		
@@ -65,23 +77,25 @@ class Horoscope:
 			# Для каждого абзаца.
 			for Paragraph in Text.split("\n\n"):
 				# Очистка краевых пробельных символов.
-				Bufer = EscapeCharacters(Paragraph.strip())
+				Bufer = RemoveRecurringSubstrings(Paragraph.strip(), " ")
+				# Удаление символов новой строки и экранирование.
+				Bufer = EscapeCharacters(Bufer.replace("\n", ""))
 				
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Личная жизнь"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["love"] = Bufer.replace("Личная жизнь:", "💞 _*Личная жизнь:*_")
+					self.__Horoscope["horoscopes"][Key]["love"] = Bufer.strip().replace("Личная жизнь:", "💞 _*Личная жизнь:*_ ")
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Карьера"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["career"] = Bufer.replace("Карьера:", "💼 _*Карьера:*_")
+					self.__Horoscope["horoscopes"][Key]["career"] = Bufer.strip().replace("Карьера:", "💼 _*Карьера:*_ ")
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Здоровье"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["health"] = Bufer.replace("Здоровье:", "💉 _*Здоровье:*_")
-
+					self.__Horoscope["horoscopes"][Key]["health"] =  Bufer.strip().replace("Здоровье:", "💉 _*Здоровье:*_ ")
+				
 			# Выжидание интервала.
 			sleep(self.__Settings["delay"])
 

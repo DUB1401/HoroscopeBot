@@ -4,12 +4,13 @@
 ## Порядок установки и использования
 1. Загрузить последний релиз. Распаковать.
 2. Установить Python версии не старше 3.10.
-3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI?ysclid=loq3f2bmuz181940716), [APScheduler](https://github.com/agronholm/apscheduler), [freeGPT](https://github.com/Ruu3f/freeGPT).
+3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI?ysclid=loq3f2bmuz181940716), [APScheduler](https://github.com/agronholm/apscheduler), [freeGPT](https://github.com/Ruu3f/freeGPT), [g4f](https://github.com/xtekky/gpt4free).
 ```
 pip install git+https://github.com/DUB1401/dublib
 pip install pyTelegramBotAPI
 pip install APScheduler
 pip install freeGPT
+pip install g4f
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
 ```
@@ -46,9 +47,9 @@ ___
 Сюда необходимо занести токен бота Telegram (можно получить у [BotFather](https://t.me/BotFather)).
 ___
 ```JSON
-"model": "gpt4"
+"mode": "g4f"
 ```
-Указывает модель, используемую для обработки запросов. Полный перечень доступен [здесь](https://github.com/Ruu3f/freeGPT?tab=readme-ov-file#sources), но не рекомендуется изменять данное значение.
+Указывает библиотеку, используемую для доступа к GPT-4. Поддерживаются: _freeGPT_, _g4f_.
 ___
 ```JSON
 "timezone": "Europe/Moscow"

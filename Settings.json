@@ -1,6 +1,7 @@
 {
 	"token": "",
 	"model": "gpt4",
+	"mode": "g4f",
 	"timezone": "Europe/Moscow",
 	"premium": false,
 	"password": "1234",
