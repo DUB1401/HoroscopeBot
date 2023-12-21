@@ -155,6 +155,26 @@ else:
 				)
 				# Установка ожидаемого типа сообщения.
 				BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+				
+			# Тип сообщения: команда остановки сбора вложения.
+			if ExcpectedValue == ExpectedMessageTypes.Image or ExcpectedValue == ExpectedMessageTypes.Undefined:
+				
+				# Остановка добавления вложений.
+				if Message.text == "🖼️ Медиа (остановить)":
+					# Запуск коллекционирования.
+					BotProcessor.collect(False)
+					# Количество вложений.
+					AttachmentsCount = BotProcessor.getAttachmentsCount()
+					# Отправка сообщения: добавление вложений.
+					Bot.send_message(
+						Message.chat.id,
+						f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
+						parse_mode = "MarkdownV2",
+						disable_web_page_preview = True,
+						reply_markup = BuildAdminMenu(BotProcessor)
+					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 
 			# Тип сообщения: неопределённый.
 			if ExcpectedValue == ExpectedMessageTypes.Undefined:
@@ -181,28 +201,10 @@ else:
 						Message.chat.id,
 						"🖼️ *Добавление вложений*\n\nОтправляйте мне изображения, которые необходимо прикрепить к сообщению, или выполните команду /unattach для удаления всех вложений\.",
 						parse_mode = "MarkdownV2",
-						disable_web_page_preview = True,
 						reply_markup = BuildAdminMenu(BotProcessor)
 					)
 					# Установка ожидаемого типа сообщения.
 					BotProcessor.setExpectedType(ExpectedMessageTypes.Image)
-						
-				# Добавление вложений.
-				if Message.text == "🖼️ Медиа (остановить)":
-					# Запуск коллекционирования.
-					BotProcessor.collect(False)
-					# Количество вложений.
-					AttachmentsCount = BotProcessor.getAttachmentsCount()
-					# Отправка сообщения: добавление вложений.
-					Bot.send_message(
-						Message.chat.id,
-						f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
-						parse_mode = "MarkdownV2",
-						disable_web_page_preview = True,
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 			
 				# Предпросмотр сообщения.
 				if Message.text == "🔍 Предпросмотр":
@@ -257,30 +259,28 @@ else:
 	# Обработка изображений (со сжатием).					
 	@Bot.message_handler(content_types=["photo"])
 	def MediaAttachments(Message: types.Message):
-	
-		# Реагирование на сообщение по ожидаемому типу.
-		match BotProcessor.getExpectedType():
+		# Ожидаемый тип значения.
+		ExcpectedValue = BotProcessor.getExpectedType()
 		
-			# Тип сообщения – текст приветствия.
-			case ExpectedMessageTypes.Image:
-				# Сохранение изображения.
-				DownloadImage(Settings["token"], Bot, Message.photo[-1].file_id)
-				# Установка ожидаемого типа сообщения.
-				BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined) 
+		# Тип сообщения: вложение.
+		if ExcpectedValue == ExpectedMessageTypes.Image:
+			# Сохранение изображения.
+			DownloadImage(Settings["token"], Bot, Message.photo[-1].file_id)
+			# Установка ожидаемого типа сообщения.
+			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined) 
 
 	# Обработка изображений (без сжатия).					
 	@Bot.message_handler(content_types=["document"])
 	def MediaAttachments(Message: types.Message):
+		# Ожидаемый тип значения.
+		ExcpectedValue = BotProcessor.getExpectedType()
 	
-		# Реагирование на сообщение по ожидаемому типу.
-		match BotProcessor.getExpectedType():
-		
-			# Тип сообщения – текст приветствия.
-			case ExpectedMessageTypes.Image:
-				# Сохранение изображения.
-				DownloadImage(Settings["token"], Bot, Message.document.file_id)
-				# Установка ожидаемого типа сообщения.
-				BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)				
+		# Тип сообщения: вложение.
+		if ExcpectedValue == ExpectedMessageTypes.Image:
+			# Сохранение изображения.
+			DownloadImage(Settings["token"], Bot, Message.document.file_id)
+			# Установка ожидаемого типа сообщения.
+			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)				
 		
 	# Запуск обработки запросов Telegram.
 	Bot.infinity_polling(allowed_updates = telebot.util.update_types)

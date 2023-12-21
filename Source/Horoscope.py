@@ -84,17 +84,17 @@ class Horoscope:
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Личная жизнь"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["love"] = Bufer.strip().replace("Личная жизнь:", "💞 _*Личная жизнь:*_ ")
+					self.__Horoscope["horoscopes"][Key]["love"] = Bufer.strip().replace("Личная жизнь:", "💞 _*Личная жизнь:*_\n")
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Карьера"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["career"] = Bufer.strip().replace("Карьера:", "💼 _*Карьера:*_ ")
+					self.__Horoscope["horoscopes"][Key]["career"] = Bufer.strip().replace("Карьера:", "💼 _*Карьера:*_\n")
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Здоровье"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["health"] =  Bufer.strip().replace("Здоровье:", "💉 _*Здоровье:*_ ")
+					self.__Horoscope["horoscopes"][Key]["health"] =  Bufer.strip().replace("Здоровье:", "💊 _*Здоровье:*_\n")
 				
 			# Выжидание интервала.
 			sleep(self.__Settings["delay"])
