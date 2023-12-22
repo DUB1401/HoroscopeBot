@@ -23,6 +23,19 @@ def BuildAdminMenu(BotProcessor: any) -> types.ReplyKeyboardMarkup:
 	
 	return Menu
 
+# Создаёт разметку меню рассылки.
+def BuildMailingMenu() -> types.ReplyKeyboardMarkup:
+	# Меню рассылки.
+	Menu = types.ReplyKeyboardMarkup(resize_keyboard = True)
+	# Генерация кнопок.
+	All = types.KeyboardButton("👤 Все пользователи")
+	Premium = types.KeyboardButton("💎 Premium")
+	Back = types.KeyboardButton("↩️ Назад")
+	# Добавление кнопок в меню.
+	Menu.add(All, Premium, Back, row_width = 1)
+	
+	return Menu
+
 # Создаёт разметку меню выбора знака зодиака.
 def BuildZodiacMenu() -> types.ReplyKeyboardMarkup:
 	# Чтение гороскопа.

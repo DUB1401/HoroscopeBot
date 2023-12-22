@@ -78,23 +78,25 @@ class Horoscope:
 			for Paragraph in Text.split("\n\n"):
 				# Очистка краевых пробельных символов.
 				Bufer = RemoveRecurringSubstrings(Paragraph.strip(), " ")
+				# Очистка маркировки.
+				Bufer = Bufer.replace("**", "")
 				# Удаление символов новой строки и экранирование.
 				Bufer = EscapeCharacters(Bufer.replace("\n", ""))
 				
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Личная жизнь"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["love"] = Bufer.strip().replace("Личная жизнь:", "💞 _*Личная жизнь:*_\n")
+					self.__Horoscope["horoscopes"][Key]["love"] = "💞 _*Личная жизнь:*_\n" + Bufer.replace("Личная жизнь:", "").strip()
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Карьера"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["career"] = Bufer.strip().replace("Карьера:", "💼 _*Карьера:*_\n")
+					self.__Horoscope["horoscopes"][Key]["career"] = "💼 _*Карьера:*_\n" + Bufer.replace("Карьера:", "").strip()
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Здоровье"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["health"] =  Bufer.strip().replace("Здоровье:", "💊 _*Здоровье:*_\n")
+					self.__Horoscope["horoscopes"][Key]["health"] = "💊 _*Здоровье:*_\n" + Bufer.replace("Здоровье:", "").strip()
 				
 			# Выжидание интервала.
 			sleep(self.__Settings["delay"])

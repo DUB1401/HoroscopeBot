@@ -2,4 +2,4 @@ git+https://github.com/DUB1401/dublib
 pyTelegramBotAPI
 APScheduler
 freeGPT
-g4f
+g4f==0.1.9.3

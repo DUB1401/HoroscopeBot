@@ -10,7 +10,7 @@ pip install git+https://github.com/DUB1401/dublib
 pip install pyTelegramBotAPI
 pip install APScheduler
 pip install freeGPT
-pip install g4f
+pip install g4f==0.1.9.3
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
 ```

@@ -155,26 +155,62 @@ else:
 				)
 				# Установка ожидаемого типа сообщения.
 				BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+					
+			# Тип сообщения: выборка.
+			if ExcpectedValue == ExpectedMessageTypes.Sampling:
 				
-			# Тип сообщения: команда остановки сбора вложения.
-			if ExcpectedValue == ExpectedMessageTypes.Image or ExcpectedValue == ExpectedMessageTypes.Undefined:
-				
-				# Остановка добавления вложений.
-				if Message.text == "🖼️ Медиа (остановить)":
-					# Запуск коллекционирования.
-					BotProcessor.collect(False)
-					# Количество вложений.
-					AttachmentsCount = BotProcessor.getAttachmentsCount()
-					# Отправка сообщения: добавление вложений.
+				# Рассылка всем активным пользователям.
+				if Message.text == "👤 Все пользователи":
+					# Запуск рассылки.
+					Result = BotProcessor.mailing(0)
+					# Отправка сообщения: завершение рассылки.
 					Bot.send_message(
 						Message.chat.id,
-						f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
+						f"📨 *Рассылка*\n\nВыборка: _активные пользователи_\.\nКоличество отправленных сообщений: _{Result}_\.",
 						parse_mode = "MarkdownV2",
-						disable_web_page_preview = True,
 						reply_markup = BuildAdminMenu(BotProcessor)
 					)
 					# Установка ожидаемого типа сообщения.
 					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+					
+				# Рассылка Premium-пользователям.
+				elif Message.text == "💎 Premium":
+					# Запуск рассылки.
+					Result = BotProcessor.mailing(-1)
+					# Отправка сообщения: завершение рассылки.
+					Bot.send_message(
+						Message.chat.id,
+						f"📨 *Рассылка*\n\nВыборка: _Premium-пользователи_\.\nКоличество отправленных сообщений: _{Result}_\.",
+						parse_mode = "MarkdownV2",
+						reply_markup = BuildAdminMenu(BotProcessor)
+					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+					
+				# Рассылка выборке пользователей.
+				elif Message.text.isdigit() == True and int(Message.text) > 0:
+					# Выборка.
+					Sampling = int(Message.text)
+					# Запуск рассылки.
+					Result = BotProcessor.mailing(Sampling)
+					# Отправка сообщения: завершение рассылки.
+					Bot.send_message(
+						Message.chat.id,
+						f"📨 *Рассылка*\n\nВыборка: _случайные пользователи_\.\nКоличество отправленных сообщений: _{Result}_\.",
+						parse_mode = "MarkdownV2",
+						reply_markup = BuildAdminMenu(BotProcessor)
+					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+					
+				# Не удалось понять запрос.
+				elif Message.text != "↩️ Назад":
+					# Отправка сообщения: ошибка распознания запроса.
+					Bot.send_message(
+						Message.chat.id,
+						f"📨 *Рассылка*\n\nНе удалось определить выборку\. Пожалуйста, повторите запрос\.",
+						parse_mode = "MarkdownV2"
+					)
 
 			# Тип сообщения: неопределённый.
 			if ExcpectedValue == ExpectedMessageTypes.Undefined:
@@ -213,15 +249,15 @@ else:
 				
 				# Запуск рассылки.
 				if Message.text == "📨 Рассылка":
-					# Запуск рассылки.
-					Result = BotProcessor.mailing()
-					# Отправка сообщения: завершение рассылки.
+					# Отправка сообщения: настройка рассылки.
 					Bot.send_message(
 						Message.chat.id,
-						f"📨 *Рассылка завершена*\n\nКоличество отправленных сообщений: {Result}\.",
+						f"📨 *Рассылка*\n\nОтправьте мне количество пользователей, для которых необходимо осуществить рассылку, либо выберите одну из доступных опций\.",
 						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
+						reply_markup = BuildMailingMenu()
 					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Sampling)
 				
 				# Вывод статистики.
 				if Message.text == "📊 Статистика":
@@ -244,6 +280,41 @@ else:
 						parse_mode = "MarkdownV2",
 						reply_markup = BuildZodiacMenu()
 					)
+					
+			# Тип сообщения: команда остановки сбора вложения.
+			if ExcpectedValue in [ExpectedMessageTypes.Image, ExpectedMessageTypes.Undefined]:
+				
+				# Остановка добавления вложений.
+				if Message.text == "🖼️ Медиа (остановить)":
+					# Запуск коллекционирования.
+					BotProcessor.collect(False)
+					# Количество вложений.
+					AttachmentsCount = BotProcessor.getAttachmentsCount()
+					# Отправка сообщения: добавление вложений.
+					Bot.send_message(
+						Message.chat.id,
+						f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
+						parse_mode = "MarkdownV2",
+						disable_web_page_preview = True,
+						reply_markup = BuildAdminMenu(BotProcessor)
+					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+					
+			# Тип сообщения: команда выхода в меню администратора из рассылки.
+			if ExcpectedValue in [ExpectedMessageTypes.Sampling, ExpectedMessageTypes.Undefined]:
+				
+				# Остановка добавления вложений.
+				if Message.text == "↩️ Назад":
+					# Отправка сообщения: отмена рассылки.
+					Bot.send_message(
+						Message.chat.id,
+						f"📨 *Рассылка*\n\nВыборка объектов рассылки отменена\.",
+						parse_mode = "MarkdownV2",
+						reply_markup = BuildAdminMenu(BotProcessor)
+					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 					
 		# Если введён верный пароль.
 		elif Message.text == Settings["password"]: 

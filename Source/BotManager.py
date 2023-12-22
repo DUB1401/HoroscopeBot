@@ -6,6 +6,7 @@ from telebot import types
 from time import sleep
 
 import telebot
+import random
 import enum
 import os
 
@@ -16,6 +17,8 @@ class ExpectedMessageTypes(enum.Enum):
 	#==========================================================================================#
 	# Неопределённое сообщение.
 	Undefined = "undefined"
+	# Выборка.
+	Sampling = "sampling"
 	# Текст сообщения.
 	Message = "message"
 	# Изображение.
@@ -108,7 +111,7 @@ class BotManager:
 			# Текущая дата.
 			Date = EscapeCharacters(self.__Horoscope.getDate().split(" ")[0])
 			# Формирование заголовка гороскопа.
-			Text = f"*Гороскоп на {Date}*\n\n🔮 *" + Zodiac.upper() + "*\n\n"
+			Text = f"*Гороскоп на {Date}*\n\n" + Data[Zodiac]["symbol"] + " *" + Zodiac.upper() + "*\n\n"
 			# Добавление рубрик гороскопа.
 			if Data[Zodiac]["love"] != None: Text += Data[Zodiac]["love"] + "\n\n"
 			if Data[Zodiac]["career"] != None: Text += Data[Zodiac]["career"] + "\n\n"
@@ -170,13 +173,60 @@ class BotManager:
 		
 		return Bufer["admin"]
 	
-	# Запускает рассылку.
-	def mailing(self) -> int:
+	# Запускает рассылку по выборке.
+	def mailing(self, Sampling: int) -> int:
 		# Количество отправок.
 		Mails = 0
+		# Выборка пользователей.
+		Users = list()
+		
+		# Если указаны все активные пользователи.
+		if Sampling == 0:
+			
+			# Для каждого пользователя.
+			for UserID in self.__Users["users"].keys():
+			
+				# Если пользователь активен.
+				if self.__Users["users"][UserID]["active"] == True: 
+					# Записать ID пользователя.
+					Users.append(UserID)
+					
+		# Если выбраны все Premium-пользователи.
+		elif Sampling == -1:
+			
+			# Для каждого пользователя.
+			for UserID in self.__Users["users"].keys():
+			
+				# Если пользователь имеет Premium.
+				if self.__Users["users"][UserID]["premium"] == True: 
+					# Записать ID пользователя.
+					Users.append(UserID)
+					
+		# Если выбрана случайная часть пользователей.
+		elif Sampling > 0:
+
+			# Буфер активных пользователей.
+			Bufer = list()
+			
+			# Для каждого пользователя.
+			for UserID in self.__Users["users"].keys():
+			
+				# Если пользователь активен.
+				if self.__Users["users"][UserID]["active"] == True: 
+					# Записать ID пользователя.
+					Bufer.append(UserID)
+			
+			# Если запрошена выборка больше, чем определено активных пользователей.
+			if Sampling >= len(Bufer):
+				# Выбрать всех активных пользователей.
+				Users = Bufer
+				
+			else:
+				# Определение случайной выборки.
+				Users = random.sample(Bufer, Sampling)
 
 		# Отправить каждому пользователю сообщение.
-		for UserID in self.__Users["users"].keys():
+		for UserID in Users:
 			
 			# Если пользователь активен.
 			if self.__Users["users"][UserID]["active"] == True: 
@@ -212,23 +262,34 @@ class BotManager:
 					)
 				)
 				
-			# Отправка медиа группы: приветствие нового подписчика.
-			self.__Bot.send_media_group(
-				ChatID,
-				media = Attachments
-			)
+			try:
+				# Отправка медиа группы: приветствие нового подписчика.
+				self.__Bot.send_media_group(
+					ChatID,
+					media = Attachments
+				)
+				
+			except Exception as ExceptionData:
+				# Вывод исключения.
+				print(ExceptionData)
 			
 		else:
 
 			# Если сообщение не пустое.
 			if len(self.__Settings["message"]) > 0:
-				# Отправка сообщения: приветствие нового подписчика.
-				self.__Bot.send_message(
-					ChatID,
-					text = self.__Settings["message"],
-					parse_mode = "HTML",
-					disable_web_page_preview = True
-				)
+				
+				try:
+					# Отправка сообщения: приветствие нового подписчика.
+					self.__Bot.send_message(
+						ChatID,
+						text = self.__Settings["message"],
+						parse_mode = "HTML",
+						disable_web_page_preview = True
+					)
+					
+				except Exception as ExceptionData:
+					# Вывод исключения.
+					print(ExceptionData)
 
 	# Задаёт тип ожидаемого сообщения.
 	def setExpectedType(self, Type: ExpectedMessageTypes):
