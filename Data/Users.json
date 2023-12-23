@@ -1,3 +1,40 @@
 {
-	"users": {}
+	"users": {
+		"518061053": {
+			"first-name": "DUB1401",
+			"last-name": null,
+			"username": "DUB1401",
+			"premium": null,
+			"subscripted": true,
+			"active": true,
+			"admin": true
+		},
+		"6491242682": {
+			"first-name": "Директор",
+			"last-name": null,
+			"username": "Direc_tor777",
+			"premium": true,
+			"subscripted": false,
+			"active": true,
+			"admin": false
+		},
+		"1408847748": {
+			"first-name": "Ириша",
+			"last-name": "Костевич",
+			"username": "sleep_fox789",
+			"premium": false,
+			"subscripted": false,
+			"active": false,
+			"admin": false
+		},
+		"984729236": {
+			"first-name": "Наталья",
+			"last-name": "Милоста",
+			"username": "cashper_spirit",
+			"premium": false,
+			"subscripted": true,
+			"active": false,
+			"admin": false
+		}
+	}
 }

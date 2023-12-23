@@ -6,7 +6,8 @@
 	"password": "1234",
 	"message": "Здравствуйте!",
 	"collect-media": false,
-	"notification": "Для использования бота подпишитесь на наши чаты.",
+	"subscription-notification": "Для использования бота подпишитесь на наши чаты.",
+	"always-check-subscriptions": false,
 	"required-subscriptions": {},
 	"delay": 1
 }
