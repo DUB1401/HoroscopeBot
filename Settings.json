@@ -1,11 +1,12 @@
 {
 	"token": "",
-	"model": "gpt4",
-	"mode": "g4f",
+	"mode": "freeGPT",
 	"timezone": "Europe/Moscow",
 	"premium": false,
 	"password": "1234",
 	"message": "Здравствуйте!",
 	"collect-media": false,
+	"notification": "Для использования бота подпишитесь на наши чаты.",
+	"required-subscriptions": {},
 	"delay": 1
 }

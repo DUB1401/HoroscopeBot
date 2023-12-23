@@ -31,6 +31,39 @@ class BotManager:
 	def __SaveSettings(self):
 		# Сохранение настроек.
 		WriteJSON("Settings.json", self.__Settings)
+		
+	# Проверяет, состоит ли пользователь в необходимых чатах.
+	def __CheckSubscriptions(self, UserID: str) -> bool:
+		# Состояние: состоит ли человек в группе.
+		IsSubscripted = False
+		# Количество подписок.
+		Subscriptions = 0
+		
+		# Если пользователь определён.
+		if UserID in self.__Users["users"].keys():
+			
+			# Для каждого чата.
+			for ChatID in self.__Settings["required-subscriptions"].keys():
+				
+				try:
+					# Получение данных об участнике чата.
+					Response = self.__Bot.get_chat_member(ChatID, int(UserID))
+					# Если участник, инкремент количества подписок.
+					if Response.status in ["admin", "creator", "member"]: Subscriptions += 1
+					
+				except Exception:
+					pass
+		
+		# Если количество подписок соответствует требуемому.
+		if Subscriptions == len(self.__Settings["required-subscriptions"].keys()):
+			# Переключение статуса.
+			IsSubscripted = True
+			# Изменение состояния подписки пользователя.			
+			self.__Users["users"][UserID]["subscripted"] = True
+			# Сохранение базы данных.
+			WriteJSON("Data/Users.json", self.__Users)
+		
+		return IsSubscripted
 	
 	# Конструктор.
 	def __init__(self, Settings: dict, Bot: telebot.TeleBot):
@@ -96,28 +129,60 @@ class BotManager:
 		return self.__Settings.copy()
 		
 	# Возвращает текст гороскопа.
-	def getHoroscope(self, Zodiac: str) -> str | None:
+	def getHoroscope(self, UserID: int, Zodiac: str) -> str | None:
 		# Разбитие по пробелам.
 		Zodiac = Zodiac.split(" ")
 		# Получение текста гороскопов.
 		Data = self.__Horoscope.getHoroscopes()
-		# Текст гороскопа.
+		# Текст ответного сообщения.
 		Text = None
 		
 		# Если знак зодиака определён.
 		if len(Zodiac) > 1 and Zodiac[1].lower() in list(map(lambda x: x.lower(), list(Data.keys()))):
-			# Получение знака зодиака.
-			Zodiac = Zodiac[1]
-			# Текущая дата.
-			Date = EscapeCharacters(self.__Horoscope.getDate().split(" ")[0])
-			# Формирование заголовка гороскопа.
-			Text = f"*Гороскоп на {Date}*\n\n" + Data[Zodiac]["symbol"] + " *" + Zodiac.upper() + "*\n\n"
-			# Добавление рубрик гороскопа.
-			if Data[Zodiac]["love"] != None: Text += Data[Zodiac]["love"] + "\n\n"
-			if Data[Zodiac]["career"] != None: Text += Data[Zodiac]["career"] + "\n\n"
-			if Data[Zodiac]["health"] != None: Text += Data[Zodiac]["health"] + "\n\n"
-			# Добавление прощания.
-			Text += "Удачного вам дня\!"
+			
+			# Если пользователь состоит во всех обязательных чатах или является администратором.
+			if self.__Users["users"][str(UserID)]["subscripted"] == True or self.__Users["users"][str(UserID)]["admin"] == True:
+				# Получение знака зодиака.
+				Zodiac = Zodiac[1]
+				# Текущая дата.
+				Date = EscapeCharacters(self.__Horoscope.getDate().split(" ")[0])
+				# Формирование заголовка гороскопа.
+				Text = f"*Гороскоп на {Date}*\n\n" + Data[Zodiac]["symbol"] + " *" + Zodiac.upper() + "*\n\n"
+				# Добавление рубрик гороскопа.
+				if Data[Zodiac]["love"] != None: Text += Data[Zodiac]["love"] + "\n\n"
+				if Data[Zodiac]["career"] != None: Text += Data[Zodiac]["career"] + "\n\n"
+				if Data[Zodiac]["health"] != None: Text += Data[Zodiac]["health"] + "\n\n"
+				# Добавление прощания.
+				Text += "Удачного вам дня\!"
+				
+			else:
+				# Список кнопок.
+				Buttons = types.InlineKeyboardMarkup(row_width = 1)
+				
+				# Для каждого чата.
+				for ChatID in self.__Settings["required-subscriptions"].keys():
+					# Информация о чате.
+					ChatInfo = None
+					
+					try:
+						# Данные чата.
+						ChatInfo = self.__Bot.get_chat(ChatID)
+						# Кнопка подписки.
+						Button = types.InlineKeyboardButton(ChatInfo.title, url = self.__Settings["required-subscriptions"][ChatID])
+						# Добавление кнопки.
+						Buttons.add(Button)
+						
+					except Exception as ExceptionData:
+						# Вывод исключения.
+						print(ExceptionData)
+					
+				# Отправка сообщения: необходима подписка.
+				self.__Bot.send_message(
+					chat_id = UserID,
+					text = self.__Settings["subscription-notification"],
+					parse_mode = "HTML",
+					reply_markup = Buttons
+				)
 
 		return Text
 
@@ -160,12 +225,21 @@ class BotManager:
 			"first-name": User.first_name,
 			"last-name": User.last_name,
 			"username": User.username,
-			"premium": User.is_premium,
+			"premium": bool(User.is_premium),
+			"subscripted": False,
 			"active": True,
 			"admin": Admin
 		}
-		# Если пользователь определён, записать его статус администратора.
-		if UserID in self.__Users["users"].keys() and Admin == False: Bufer["admin"] = self.__Users["users"][UserID]["admin"]
+		# Если пользователь определён.
+		if UserID in self.__Users["users"].keys() and Admin == False:
+			# Запись статуса администратора, подписки и активности.
+			Bufer["admin"] = self.__Users["users"][UserID]["admin"]
+			Bufer["subscripted"] = self.__Users["users"][UserID]["subscripted"]
+			Bufer["active"] = self.__Users["users"][UserID]["active"]
+			
+		# Если подписки не выполнены, проверить их статус.
+		if Bufer["subscripted"] == False or self.__Settings["always-check-subscriptions"] == True: Bufer["subscripted"] = self.__CheckSubscriptions(UserID)
+		
 		# Перезапись данных пользователя.
 		self.__Users["users"][UserID] = Bufer	
 		# Сохранение базы данных.

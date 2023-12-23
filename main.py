@@ -124,7 +124,7 @@ else:
 		ExcpectedValue = BotProcessor.getExpectedType()
 		
 		# Попытка получения гороскопа.
-		Result = BotProcessor.getHoroscope(Message.text)
+		Result = BotProcessor.getHoroscope(Message.from_user.id, Message.text)
 			
 		# Если гороскоп получен.
 		if Result != None:
