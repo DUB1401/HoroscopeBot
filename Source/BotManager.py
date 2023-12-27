@@ -51,7 +51,7 @@ class BotManager:
 					# Если участник, инкремент количества подписок.
 					if Response.status in ["admin", "creator", "member"]: Subscriptions += 1
 					
-				except Exception:
+				except:
 					pass
 		
 		# Если количество подписок соответствует требуемому.
@@ -161,14 +161,10 @@ class BotManager:
 				
 				# Для каждого чата.
 				for ChatID in self.__Settings["required-subscriptions"].keys():
-					# Информация о чате.
-					ChatInfo = None
 					
 					try:
-						# Данные чата.
-						ChatInfo = self.__Bot.get_chat(ChatID)
 						# Кнопка подписки.
-						Button = types.InlineKeyboardButton(ChatInfo.title, url = self.__Settings["required-subscriptions"][ChatID])
+						Button = types.InlineKeyboardButton(self.__Settings["required-subscriptions"][ChatID]["title"], url = self.__Settings["required-subscriptions"][ChatID]["link"])
 						# Добавление кнопки.
 						Buttons.add(Button)
 						
@@ -230,6 +226,7 @@ class BotManager:
 			"active": True,
 			"admin": Admin
 		}
+		
 		# Если пользователь определён.
 		if UserID in self.__Users["users"].keys() and Admin == False:
 			# Запись статуса администратора, подписки и активности.
@@ -239,7 +236,6 @@ class BotManager:
 			
 		# Если подписки не выполнены, проверить их статус.
 		if Bufer["subscripted"] == False or self.__Settings["always-check-subscriptions"] == True: Bufer["subscripted"] = self.__CheckSubscriptions(UserID)
-		
 		# Перезапись данных пользователя.
 		self.__Users["users"][UserID] = Bufer	
 		# Сохранение базы данных.

@@ -1,4 +1,4 @@
-from dublib.Methods import ReadJSON, RemoveRecurringSubstrings, WriteJSON
+from dublib.Methods import ReadJSON, RemoveRecurringSubstrings, RemoveRegexSubstring, WriteJSON
 from Source.Functions import EscapeCharacters
 from freeGPT import Client
 from time import sleep
@@ -18,41 +18,50 @@ class Horoscope:
 		Zodiac = Zodiac.lower()
 		# Гороскоп.
 		Text = ""
-		# Составление запроса.
-		Request = f"Составь уникальный неповторимый гороскоп на сегодняшний день для знака зодиака {Zodiac}. Гороскоп должен обязательно иметь следующие категории: личная жизнь, карьера, здоровье! Гороскоп должен быть "
+		# Модификаторы настроения.
+		Modificators = ["(позитивный)", "(позитивный)", "(позитивный)"]
 		
-		# Если гороскоп должен быть плохим.
-		if random.choice([1, 2]) == 1:
-			# Негативизация.
-			Request += "негативным." 
-			
-		else:
-			# Позитивизация.
-			Request += "позитивным." 
+		# Если сегодня есть негативный прогноз.
+		if random.randrange(2) == 0:
+			# Выбор негативной сферы.
+			Modificators[random.choice([0, 1, 2])] = "(негативный)"
+
+		# Составление запроса.
+		Request = f"Составь уникальный неповторимый гороскоп на сегодняшний день для знака зодиака {Zodiac}. Гороскоп должен обязательно иметь следующие категории: личная жизнь {Modificators[0]}, карьера {Modificators[1]}, здоровье {Modificators[2]}!"
 		
 		# Пока не получен удовлетворительный результат.
-		while "личная жизнь:" not in Text.lower() or "карьера:" not in Text.lower() or "здоровье:" not in Text.lower():
+		while "личная жизнь" not in Text.lower() or "карьера" not in Text.lower() or "здоровье" not in Text.lower():
 			# Вывод в консоль: выполнение запроса.
-			print(f"Requesting by " + self.__Settings["mode"] + "...")
+			print(f"Requesting by " + self.__Settings["lib"] + "...")
 			
 			# Если используется библиотека freeGPT.
-			if self.__Settings["mode"] == "freeGPT":
+			if self.__Settings["lib"] == "freeGPT":
 				# Выполнение запроса.
 				Response = Client.create_completion("gpt4", Request)
 				# Интерпретация запроса.
 				Text = Response.encode("utf-8").decode("unicode-escape")
 			
 			# Если используется библиотека g4f.
-			elif self.__Settings["mode"] == "g4f":
-				# Выполнение запроса.
-				Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, messages = [{"role": "user", "content": Request}])
+			elif self.__Settings["lib"] == "g4f":
+				
+				try:
+					# Выполнение запроса.
+					Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, provider = g4f.Provider.GeekGpt, messages = [{"role": "user", "content": Request}])
+					
+				except:
+					# Выжидание интервала.
+					sleep(self.__Settings["delay"])
 				
 			else:
 				# Выброс исключения.
-				raise Exception("Unsupported GPT-4 lib: \"" + self.__Settings["mode"] + "\".")
+				raise Exception("Unsupported GPT-4 lib: \"" + self.__Settings["lib"] + "\".")
 				
 		# Вывод в консоль: завершение.
 		print("Done.")
+		# Удаление модификаторов прогноза.
+		Text = RemoveRegexSubstring(Text, ".?\([ПпНн][ое][зг][иа]тивный\):?")
+		# Очистка маркировки.
+		Text = Text.replace("**", "")
 		
 		return Text
 	
@@ -86,28 +95,26 @@ class Horoscope:
 			
 			# Для каждого абзаца.
 			for Paragraph in Text.split("\n\n"):
-				# Очистка краевых пробельных символов.
+				# Очистка поторяющихся пробелов.
 				Bufer = RemoveRecurringSubstrings(Paragraph.strip(), " ")
-				# Очистка маркировки.
-				Bufer = Bufer.replace("**", "")
 				# Удаление символов новой строки и экранирование.
 				Bufer = EscapeCharacters(Bufer.replace("\n", ""))
 				
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Личная жизнь"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["love"] = "💞 _*Личная жизнь:*_\n" + Bufer.replace("Личная жизнь:", "").strip()
+					self.__Horoscope["horoscopes"][Key]["love"] = "💞 _*Личная жизнь:*_\n" + RemoveRegexSubstring(Bufer, "^[Лл]ичная жизнь").strip()
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Карьера"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["career"] = "💼 _*Карьера:*_\n" + Bufer.replace("Карьера:", "").strip()
+					self.__Horoscope["horoscopes"][Key]["career"] = "💼 _*Карьера:*_\n" + RemoveRegexSubstring(Bufer, "^[Кк]арьера").strip()
 					
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Здоровье"):
 					# Заполнение поля личной жизни.
-					self.__Horoscope["horoscopes"][Key]["health"] = "💊 _*Здоровье:*_\n" + Bufer.replace("Здоровье:", "").strip()
-				
+					self.__Horoscope["horoscopes"][Key]["health"] = "💊 _*Здоровье:*_\n" + RemoveRegexSubstring(Bufer, "^[Зз]доровье").strip()
+					
 			# Выжидание интервала.
 			sleep(self.__Settings["delay"])
 

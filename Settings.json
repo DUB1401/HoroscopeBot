@@ -1,6 +1,6 @@
 {
 	"token": "",
-	"mode": "freeGPT",
+	"lib": "g4f",
 	"timezone": "Europe/Moscow",
 	"premium": false,
 	"password": "1234",
