@@ -300,14 +300,23 @@ class BotManager:
 			
 			# Если пользователь активен.
 			if self.__Users["users"][UserID]["active"] == True: 
-				# Отправка сообщения.
-				self.sendMessage(int(UserID))
-				# Инкремент количество отправок.
-				Mails += 1
+				
+				try:
+					# Отправка сообщения.
+					self.sendMessage(int(UserID))
+					# Инкремент количество отправок.
+					Mails += 1
+					
+				except:
+					# Пометка пользователя как неактивного.
+					self.__Users["users"][UserID]["active"] = False
 				
 			# Выжидание интервала.
 			sleep(self.__Settings["delay"])
-
+			
+		# Сохранение базы данных.
+		WriteJSON("Data/Users.json", self.__Users)
+			
 		return Mails
 			
 	# Отправляет сообщение.
