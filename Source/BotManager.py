@@ -49,7 +49,7 @@ class BotManager:
 					# Получение данных об участнике чата.
 					Response = self.__Bot.get_chat_member(ChatID, int(UserID))
 					# Если участник, инкремент количества подписок.
-					if Response.status in ["admin", "creator", "member"]: Subscriptions += 1
+					if Response.status in ["admin", "creator", "member", "restricted"]: Subscriptions += 1
 					
 				except:
 					pass
@@ -58,10 +58,6 @@ class BotManager:
 		if Subscriptions == len(self.__Settings["required-subscriptions"].keys()):
 			# Переключение статуса.
 			IsSubscripted = True
-			# Изменение состояния подписки пользователя.			
-			self.__Users["users"][UserID]["subscripted"] = True
-			# Сохранение базы данных.
-			WriteJSON("Data/Users.json", self.__Users)
 		
 		return IsSubscripted
 	
