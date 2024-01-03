@@ -49,7 +49,7 @@ class BotManager:
 					# Получение данных об участнике чата.
 					Response = self.__Bot.get_chat_member(ChatID, int(UserID))
 					# Если участник, инкремент количества подписок.
-					if Response.status in ["admin", "creator", "member", "restricted"]: Subscriptions += 1
+					if Response.status in ["administrator", "creator", "member", "restricted"]: Subscriptions += 1
 					
 				except:
 					pass
