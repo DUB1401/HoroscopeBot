@@ -1,4 +1,5 @@
-﻿from dublib.Methods import ReadJSON
+﻿from dublib.Polyglot import Markdown
+from dublib.Methods import ReadJSON
 from telebot import types
 
 import requests
@@ -90,11 +91,9 @@ def DownloadImage(Token: str, Bot: telebot.TeleBot, FileID: int) -> bool:
 
 # Экранирует символы при использовании MarkdownV2 разметки.
 def EscapeCharacters(Post: str) -> str:
-	# Список экранируемых символов. _ * [ ] ( ) ~ ` > # + - = | { } . !
-	CharactersList = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-
-	# Экранировать каждый символ из списка.
-	for Character in CharactersList:
-		Post = Post.replace(Character, "\\" + Character)
-
+	# Экранирование текста.
+	Post = Markdown(Post)
+	Post.escape()
+	Post = str(Post)
+	
 	return Post

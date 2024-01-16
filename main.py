@@ -39,14 +39,14 @@ CommandsList.append(COM_update)
 # Инициализация обработчика консольных аргументов.
 CAC = Terminalyzer()
 # Получение информации о проверке команд. 
-CommandDataStruct = CAC.checkCommands(CommandsList)
+CommandDataStruct = CAC.check_commands(CommandsList)
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОММАНД <<<<< #
 #==========================================================================================#
 
 # Обработка команды: update.
-if CommandDataStruct != None and "update" == CommandDataStruct.Name:
+if CommandDataStruct != None and "update" == CommandDataStruct.name:
 	# Инициализация сборщика.
 	Updater = Horoscope(Settings)
 	# Сбор списка алиасов тайтлов, подходящих под фильтр.

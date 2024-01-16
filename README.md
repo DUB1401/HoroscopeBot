@@ -4,12 +4,12 @@
 ## Порядок установки и использования
 1. Загрузить последний релиз. Распаковать.
 2. Установить Python версии не старше 3.10.
-3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI?ysclid=loq3f2bmuz181940716), [APScheduler](https://github.com/agronholm/apscheduler), [freeGPT](https://github.com/Ruu3f/freeGPT), [g4f](https://github.com/xtekky/gpt4free).
+3. В среду исполнения установить следующие пакеты: [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI?ysclid=loq3f2bmuz181940716), [APScheduler](https://github.com/agronholm/apscheduler), [freeGPT](https://github.com/Ruu3f/freeGPT), [dublib](https://github.com/DUB1401/dublib), [g4f](https://github.com/xtekky/gpt4free).
 ```
-pip install git+https://github.com/DUB1401/dublib
 pip install pyTelegramBotAPI
 pip install APScheduler
 pip install freeGPT
+pip install dublib
 pip install g4f
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
@@ -102,4 +102,4 @@ ___
 ```
 Интервал в секундах между последовательными запросами к серверам Telegram.
 
-_Copyright © DUB1401. 2023._
+_Copyright © DUB1401. 2023-2024._
