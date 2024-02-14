@@ -1,4 +1,4 @@
-from dublib.Methods import ReadJSON, RemoveRecurringSubstrings, RemoveRegexSubstring, WriteJSON
+from dublib.Methods import ReadJSON, RemoveRecurringSubstrings, ReplaceRegexSubstring, WriteJSON
 from Source.Functions import EscapeCharacters
 from freeGPT import Client
 from time import sleep
@@ -50,9 +50,11 @@ class Horoscope:
 				
 				try:
 					# Выполнение запроса.
-					Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, provider = g4f.Provider.GeekGpt, messages = [{"role": "user", "content": Request}])
+					Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, provider = g4f.Provider.Aura, messages = [{"role": "user", "content": Request}])
 					
-				except:
+				except Exception as ExceptionData:
+					# Вывод в консоль: исключение.
+					print(ExceptionData)
 					# Выжидание интервала.
 					sleep(self.__Settings["delay"])
 				
@@ -63,8 +65,8 @@ class Horoscope:
 		# Вывод в консоль: завершение.
 		print("Done.")
 		# Удаление модификаторов прогноза.
-		Text = RemoveRegexSubstring(Text, ".?\([ПпНн][ое][зг][иа]тивный\):?")
-		Text = RemoveRegexSubstring(Text, ".?\([Нн]ейтральный\):?")
+		Text = ReplaceRegexSubstring(Text, ".?\([ПпНн][ое][зг][иа]тивный\):?", "")
+		Text = ReplaceRegexSubstring(Text, ".?\([Нн]ейтральный\):?", "")
 		# Очистка маркировки.
 		Text = Text.replace("**", "")
 		
@@ -108,7 +110,7 @@ class Horoscope:
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Личная жизнь"):
 					# Буфер горосокопа.
-					Bufer = RemoveRegexSubstring(Bufer, "^[Лл]ичная жизнь").strip(": \n")
+					Bufer = ReplaceRegexSubstring(Bufer, "^[Лл]ичная жизнь", "").strip(": \n")
 					# Если буфер начинается с символа в нижнем регистре, добавить копию идентификатора.
 					if Bufer[0].islower() == True: Bufer = "Личная жизнь " + Bufer
 					# Заполнение поля личной жизни.
@@ -117,7 +119,7 @@ class Horoscope:
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Карьера"):
 					# Буфер горосокопа.
-					Bufer = RemoveRegexSubstring(Bufer, "^[Кк]арьера").strip(": \n")
+					Bufer = ReplaceRegexSubstring(Bufer, "^[Кк]арьера", "").strip(": \n")
 					# Если буфер начинается с символа в нижнем регистре, добавить копию идентификатора.
 					if Bufer[0].islower() == True: Bufer = "Карьера " + Bufer
 					# Заполнение поля личной жизни.
@@ -126,7 +128,7 @@ class Horoscope:
 				# Если параграф описывает личную жизнь.
 				if Bufer.startswith("Здоровье"):
 					# Буфер горосокопа.
-					Bufer = RemoveRegexSubstring(Bufer, "^[Зз]доровье").strip(": \n")
+					Bufer = ReplaceRegexSubstring(Bufer, "^[Зз]доровье", "").strip(": \n")
 					# Если буфер начинается с символа в нижнем регистре, добавить копию идентификатора.
 					if Bufer[0].islower() == True: Bufer = "Здоровье " + Bufer
 					# Заполнение поля личной жизни.
