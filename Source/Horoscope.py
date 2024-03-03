@@ -50,7 +50,7 @@ class Horoscope:
 				
 				try:
 					# Выполнение запроса.
-					Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, provider = g4f.Provider.Aura, messages = [{"role": "user", "content": Request}])
+					Text = g4f.ChatCompletion.create(model = g4f.models.gpt_4, provider = g4f.Provider.You, messages = [{"role": "user", "content": Request}])
 					
 				except Exception as ExceptionData:
 					# Вывод в консоль: исключение.
