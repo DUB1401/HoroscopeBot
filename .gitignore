@@ -1,10 +1,9 @@
-# Visual Studio project files.
-HoroscopeBot.pyproj
-HoroscopeBot.sln
-.vs
-
-# Python cache.
+# Python virtual enviroment and cache.
 __pycache__
-
-# Data.
-Attachments
+.venv
+# Bot data.
+Data/Horoscopes.json
+Data/Images/qr.jpg
+Data/Horoscopes
+TeleCache.json
+Data/Users

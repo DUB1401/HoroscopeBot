@@ -1,358 +1,195 @@
-from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent
-from Source.Horoscope import Horoscope
-from dublib.Terminalyzer import *
-from Source.BotManager import *
-from Source.Functions import *
+from Source.Core.Horoscope import Horoscoper, Zodiacs
+from Source.UI import InlineKeyboards, ReplyKeyboards
+from Source.Core.Scheduler import Scheduler
+from Source.UI.AdminPanel import Panel
+
+from dublib.TelebotUtils import TeleCache, TeleMaster, UsersManager
+from dublib.Methods.System import CheckPythonMinimalVersion
+from dublib.Methods.Filesystem import MakeRootDirectories
+from dublib.Methods.JSON import ReadJSON
+from dublib.Polyglot import Markdown
 from telebot import types
 
+import gettext
 import telebot
+import random
+import os
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СКРИПТА <<<<< #
 #==========================================================================================#
 
-# Проверка поддержки используемой версии Python.
 CheckPythonMinimalVersion(3, 10)
-# Создание папок в корневой директории.
-MakeRootDirectories(["Attachments", "Data"])
+MakeRootDirectories(["Data/Horoscopes"])
+
+_ = gettext.gettext
 
 #==========================================================================================#
-# >>>>> ЧТЕНИЕ НАСТРОЕК <<<<< #
+# >>>>> ЧТЕНИЕ НАСТРОЕК И СОЗДАНИЕ ОБЪЕКТОВ <<<<< #
 #==========================================================================================#
 
-# Чтение настроек.
 Settings = ReadJSON("Settings.json")
-# Если токен не указан, выбросить исключение.
-if type(Settings["token"]) != str or Settings["token"].strip() == "": raise Exception("Invalid Telegram bot token.")
+if type(Settings["bot_token"]) != str or Settings["bot_token"].strip() == "": raise Exception("Invalid Telegram bot token.")
+if type(Settings["bot_name"]) == str: Settings["bot_name"] = Settings["bot_name"].strip("\t \n@")
 
-#==========================================================================================#
-# >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #
-#==========================================================================================#
+try: gettext.translation("HoroscopeBot", "Locales", languages = [Settings["language"]]).install()
+except FileNotFoundError: pass
 
-# Список описаний обрабатываемых команд.
-CommandsList = list()
+Bot = telebot.TeleBot(Settings["bot_token"])
+MasterBot = TeleMaster(Bot)
+Users = UsersManager("Data/Users")
+AdminPanel = Panel()
 
-# Создание команды: update.
-COM_update = Command("update")
-CommandsList.append(COM_update)
+Cacher = TeleCache("TeleCache.json")
+Cacher.set_options(Bot, Settings["cache_chat_id"])
 
-# Инициализация обработчика консольных аргументов.
-CAC = Terminalyzer()
-# Получение информации о проверке команд. 
-CommandDataStruct = CAC.check_commands(CommandsList)
+Horoscopes = Horoscoper(Cacher)
+
+SchedulerObject = Scheduler(Bot, Users, Horoscopes, Settings["timezone"])
+SchedulerObject.update_horoscopes()
+SchedulerObject.run()
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОММАНД <<<<< #
 #==========================================================================================#
 
-# Обработка команды: update.
-if CommandDataStruct != None and "update" == CommandDataStruct.name:
-	# Инициализация сборщика.
-	Updater = Horoscope(Settings)
-	# Сбор списка алиасов тайтлов, подходящих под фильтр.
-	Updater.update()
+AdminPanel.decorators.commands(Bot, Users, Settings["password"])
+
+@Bot.message_handler(commands = ["mailset"])
+def Command(Message: types.Message):
+	User = Users.auth(Message.from_user)
+
+	Zodiac = User.get_property("zodiac")
+
+	if Zodiac: Bot.send_message(User.id, _("Желаете выключить ежедневную рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications_disable())
+	else: Bot.send_message(User.id, _("Желаете включить ежедневную рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications_confirm())
+
+@Bot.message_handler(commands = ["share"])
+def Command(Message: types.Message):
+	User = Users.auth(Message.from_user)
 	
-# Запуск Telegram бота.
-else:
-	# Токен для работы определенного бота телегамм.
-	Bot = telebot.TeleBot(Settings["token"])
-	# Менеджер данных бота.
-	BotProcessor = BotManager(Settings, Bot)
+	QrPath = "Data/Images/qr.jpg"
+	BotName = Settings["bot_name"]
+
+	if BotName: BotName = f"@{BotName}\n@{BotName}\n@{BotName}\n\n"
+	else: BotName = ""
+
+	Caption = BotName + _("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!")
+
+	if os.path.exists(QrPath):
+		FileID = None
+
+		try: FileID = Cacher[QrPath]
+		except KeyError: FileID = Cacher.upload_file(QrPath, types.InputMediaPhoto).id
+
+		Bot.send_photo(User.id, FileID, Caption, parse_mode = "HTML")
+
+	else:
+		Bot.send_message(User.id, Caption, parse_mode = "HTML")
+
+@Bot.message_handler(commands = ["start"])
+def Command(Message: types.Message):
+	User = Users.auth(Message.from_user)
+	User.set_property("zodiac", None, force = False)
+
+	Bot.send_message(
+		chat_id = Message.chat.id,
+		text = _("<b>Добро пожаловать в Гороскоп дня!</b>\n\nСамый большой и популярный бот-астролог в Telegram 💫\n\nВыбирай свой знак зодиака и смело начинай этот день!"),
+		parse_mode = "HTML",
+		reply_markup = ReplyKeyboards.zodiac_menu()
+	)
+
+#==========================================================================================#
+# >>>>> ОБРАБОТКА REPLY-КНОПОК <<<<< #
+#==========================================================================================#
+
+AdminPanel.decorators.reply_keyboards(Bot, Users)
+
+#==========================================================================================#
+# >>>>> ОБРАБОТКА ВВОДА ТЕКСТА <<<<< #
+#==========================================================================================#
+
+@Bot.message_handler(content_types = ["text"])
+def Text(Message: types.Message):
+	User = Users.auth(Message.from_user)
+	if AdminPanel.procedures.text(Bot, User, Message): return
+
+	ErrorMessages = [
+		_("Здравейте, используйте кнопки ниже, для выбора своего знака зодиака"),
+		_("Немножко некорректный запрос. Для работы со мной используйте меню внизу)"),
+		_("Не могу обработать эту команду. Буду рад, если вы нажмете на свой знак зодиака"),
+		_("Очень интересно, но, к сожалению, не знаю, что на это ответить. Попробуйте использовать меню внизу)"),
+		_("Это неизвестная для меня команда. Для получения прогноза вам лучше воспользоваться кнопками ниже")
+	]
+
+	ErrorMessage = random.choice(ErrorMessages)
+	Words = Message.text.split(" ")
+
+	if len(Words) != 2:
+		Bot.send_message(User.id, ErrorMessage)
+		return
+
+	Zodiac = Words[-1].lower()
+
+	if Zodiac not in [Element.value for Element in Zodiacs]:
+		Bot.send_message(User.id, ErrorMessage)
+		return
 	
-	# Обработка команды: admin.
-	@Bot.message_handler(commands = ["admin"])
-	def Command(Message: types.Message):
-		# Авторизация пользователя.
-		Admin = BotProcessor.login(Message.from_user)
-		
-		# Если пользователь является администратором.
-		if Admin == True:
-			# Отправка сообщения: меню администратора.
-			Bot.send_message(
-				chat_id = Message.chat.id,
-				text = "🔒 Доступ к функциям администрирования: *разрешён*\n\n_Панель администрирования открыта\._",
-				parse_mode = "MarkdownV2",
-				reply_markup = BuildAdminMenu(BotProcessor)
-			)
-			
-		else:
-			# Отправка сообщения: права администратора невалидны.
-			Bot.send_message(
-				chat_id = Message.chat.id,
-				text = "🔒 Доступ к функциям администрирования: *запрещён*",
-				parse_mode = "MarkdownV2"
-			)
-	
-	# Обработка команды: start.
-	@Bot.message_handler(commands = ["start"])
-	def Command(Message: types.Message):
-		# Авторизация пользователя.
-		BotProcessor.login(Message.from_user)
-		# Отправка сообщения: приветствие.
-		Bot.send_message(
-			Message.chat.id,
-			"*Добро пожаловать в Гороскоп дня\!*\n\nСамый большой и популярный бот\-астролог в Telegram\.\n\nВыбирай свой знак зодиака и смело начинай этот день\!",
-			parse_mode = "MarkdownV2",
-			reply_markup = BuildZodiacMenu()
-		)
-		
-	# Обработка команды: unattach.
-	@Bot.message_handler(commands=["unattach"])
-	def Command(Message: types.Message):
-	
-		# Если пользователь уже администратор.
-		if BotProcessor.login(Message.from_user) == True:
-			# Удаление текущих вложений.
-			RemoveFolderContent("Attachments")
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-			# Отправка сообщения: приветствие.
-			Bot.send_message(
-				Message.chat.id,
-				"🖼️ *Добавление вложений*\n\nВсе вложения удалены\.",
-				parse_mode = "MarkdownV2",
-				disable_web_page_preview = True,
-				reply_markup = BuildAdminMenu(BotProcessor)
-			)
-		
-	# Обработка текстовых сообщений.
-	@Bot.message_handler(content_types = ["text"])
-	def TextMessage(Message: types.Message):
-		# Авторизация пользователя.
-		Admin = BotProcessor.login(Message.from_user)
-		# Ожидаемый тип значения.
-		ExcpectedValue = BotProcessor.getExpectedType()
-		
-		# Попытка получения гороскопа.
-		Result = BotProcessor.getHoroscope(Message.from_user.id, Message.text)
-			
-		# Если гороскоп получен.
-		if Result != None:
-			# Отправка сообщения: гороскоп.
-			Bot.send_message(
-				Message.chat.id,
-				Result,
-				parse_mode = "MarkdownV2",
-				reply_markup = BuildZodiacMenu()
-			)
-		
-		# Если пользователь является администратором.
-		if Admin == True:
-		
-			# Тип сообщения: текст.
-			if ExcpectedValue == ExpectedMessageTypes.Message:
-				# Сохранение нового текста.
-				Result = BotProcessor.editMessage(Message.html_text)
-				# Комментарий.			
-				Comment = "Текст сообщения изменён\." if Result == True else EscapeCharacters("Сообщение слишком длинное! Telegram устанавливает следующие лимиты:\n\n4096 символов – обычное сообщение;\n2048 символов – сообщение с вложениями (Premium);\n1024 символа – сообщение с вложениями.")
-				# Отправка сообщения: редактирование приветствия завершено.
-				Bot.send_message(
-					Message.chat.id,
-					"✍ *Редактирование сообщения*\n\n" + Comment,
-					parse_mode = "MarkdownV2",
-					disable_web_page_preview = True,
-					reply_markup = BuildAdminMenu(BotProcessor)
+	Zodiac = Zodiacs(Zodiac)
+	SchedulerObject.send_horoscope(User, Zodiac)
+
+#==========================================================================================#
+# >>>>> ОБРАБОТКА INLINE-КНОПОК <<<<< #
+#==========================================================================================#
+
+AdminPanel.decorators.inline_keyboards(Bot, Users)
+
+@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("notifications"))
+def InlineButton(Call: types.CallbackQuery):
+	User = Users.auth(Call.from_user)
+
+	Parameters = Call.data.split("_")
+	Command = Parameters[1]
+	Value = Parameters[2]
+
+	match Command:
+
+		case "answer":
+
+			if Value == "yes":
+				Bot.edit_message_text(_("Выберите свой знак зодиака из представленного ниже списка:"), User.id, Call.message.id, reply_markup = InlineKeyboards.zodiac_selector())
+
+			else:
+				Bot.edit_message_text(
+					text = _("Хорошо! Вы в любой момент сможете посмотреть <b>Гороскоп дня</b>, нажав на кнопку своего знака зодиака 💫"),
+					chat_id = User.id,
+					message_id = Call.message.id,
+					parse_mode = "HTML",
+					reply_markup = None
 				)
-				# Установка ожидаемого типа сообщения.
-				BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-					
-			# Тип сообщения: выборка.
-			if ExcpectedValue == ExpectedMessageTypes.Sampling:
-				
-				# Рассылка всем активным пользователям.
-				if Message.text == "👤 Все пользователи":
-					# Запуск рассылки.
-					Result = BotProcessor.mailing(0)
-					# Отправка сообщения: завершение рассылки.
-					Bot.send_message(
-						Message.chat.id,
-						f"📨 *Рассылка*\n\nВыборка: _активные пользователи_\.\nКоличество отправленных сообщений: _{Result}_\.",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-					
-				# Рассылка Premium-пользователям.
-				elif Message.text == "💎 Premium":
-					# Запуск рассылки.
-					Result = BotProcessor.mailing(-1)
-					# Отправка сообщения: завершение рассылки.
-					Bot.send_message(
-						Message.chat.id,
-						f"📨 *Рассылка*\n\nВыборка: _Premium-пользователи_\.\nКоличество отправленных сообщений: _{Result}_\.",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-					
-				# Рассылка выборке пользователей.
-				elif Message.text.isdigit() == True and int(Message.text) > 0:
-					# Выборка.
-					Sampling = int(Message.text)
-					# Запуск рассылки.
-					Result = BotProcessor.mailing(Sampling)
-					# Отправка сообщения: завершение рассылки.
-					Bot.send_message(
-						Message.chat.id,
-						f"📨 *Рассылка*\n\nВыборка: _случайные пользователи_\.\nКоличество отправленных сообщений: _{Result}_\.",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-					
-				# Не удалось понять запрос.
-				elif Message.text != "↩️ Назад":
-					# Отправка сообщения: ошибка распознания запроса.
-					Bot.send_message(
-						Message.chat.id,
-						f"📨 *Рассылка*\n\nНе удалось определить выборку\. Пожалуйста, повторите запрос\.",
-						parse_mode = "MarkdownV2"
-					)
 
-			# Тип сообщения: неопределённый.
-			if ExcpectedValue == ExpectedMessageTypes.Undefined:
-				
-				# Редактирование поста.
-				if Message.text == "✍ Редактировать":
-					# Отправка сообщения: редактирование приветствия.
-					Bot.send_message(
-						Message.chat.id,
-						"✍ *Редактирование сообщение*\n\nОтправьте мне текст нового сообщения\.",
-						parse_mode = "MarkdownV2",
-						disable_web_page_preview = True,
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Message)
-				
-				# Добавление вложений.
-				if Message.text == "🖼️ Медиа":
-					# Запуск коллекционирования.
-					BotProcessor.collect(True)
-					# Отправка сообщения: добавление вложений.
-					Bot.send_message(
-						Message.chat.id,
-						"🖼️ *Добавление вложений*\n\nОтправляйте мне изображения, которые необходимо прикрепить к сообщению, или выполните команду /unattach для удаления всех вложений\.",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Image)
-			
-				# Предпросмотр сообщения.
-				if Message.text == "🔍 Предпросмотр":
-					# Отправка сообщения: предпросмотр сообщения.
-					BotProcessor.sendMessage(Message.chat.id)
-				
-				# Запуск рассылки.
-				if Message.text == "📨 Рассылка":
-					# Отправка сообщения: настройка рассылки.
-					Bot.send_message(
-						Message.chat.id,
-						f"📨 *Рассылка*\n\nОтправьте мне количество пользователей, для которых необходимо осуществить рассылку, либо выберите одну из доступных опций\.",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildMailingMenu()
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Sampling)
-				
-				# Вывод статистики.
-				if Message.text == "📊 Статистика":
-					# Сбор статистики.
-					Result = BotProcessor.getStatistics()
-					# Отправка сообщения: статистика.
-					Bot.send_message(
-						chat_id = Message.chat.id,
-						text = Result,
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-				
-				# Выход из панели администрирования.
-				if Message.text == "❌ Выход":
-					# Отправка сообщения: выход.
-					Bot.send_message(
-						chat_id = Message.chat.id,
-						text = "🔒 Доступ к функциям администрирования: *разрешён*\n\n_Панель администрирования закрыта\._",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildZodiacMenu()
-					)
-					
-			# Тип сообщения: команда остановки сбора вложения.
-			if ExcpectedValue in [ExpectedMessageTypes.Image, ExpectedMessageTypes.Undefined]:
-				
-				# Остановка добавления вложений.
-				if Message.text == "🖼️ Медиа (остановить)":
-					# Запуск коллекционирования.
-					BotProcessor.collect(False)
-					# Количество вложений.
-					AttachmentsCount = BotProcessor.getAttachmentsCount()
-					# Отправка сообщения: добавление вложений.
-					Bot.send_message(
-						Message.chat.id,
-						f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
-						parse_mode = "MarkdownV2",
-						disable_web_page_preview = True,
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-					
-			# Тип сообщения: команда выхода в меню администратора из рассылки.
-			if ExcpectedValue in [ExpectedMessageTypes.Sampling, ExpectedMessageTypes.Undefined]:
-				
-				# Остановка добавления вложений.
-				if Message.text == "↩️ Назад":
-					# Отправка сообщения: отмена рассылки.
-					Bot.send_message(
-						Message.chat.id,
-						f"📨 *Рассылка*\n\nВыборка объектов рассылки отменена\.",
-						parse_mode = "MarkdownV2",
-						reply_markup = BuildAdminMenu(BotProcessor)
-					)
-					# Установка ожидаемого типа сообщения.
-					BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-					
-		# Если введён верный пароль.
-		elif Message.text == Settings["password"]: 
-			# Выдача прав администратора.
-			Admin = BotProcessor.login(Message.from_user, Admin = True)
-			# Отправка сообщения: права администратора валидны.
-			Bot.send_message(
-				Message.chat.id,
-				"🔒 Доступ к функциям администрирования: *разрешён*",
-				parse_mode = "MarkdownV2"
+		case "disable":
+
+			if Value == "yes":
+				User.set_property("zodiac", None)
+				Bot.edit_message_text(_("Рассылка отключена."), User.id, Call.message.id, reply_markup = None)
+
+			else:
+				Bot.delete_message(User.id, Call.message.id)
+
+		case "set":
+			User.set_property("zodiac", Value)
+			Bot.edit_message_text(
+				text = _("Спасибо! Теперь вы будете просыпаться вместе со звездами! ✨️"),
+				chat_id = User.id,
+				message_id = Call.message.id,
+				reply_markup = None
 			)
-				
-	# Обработка изображений (со сжатием).					
-	@Bot.message_handler(content_types=["photo"])
-	def MediaAttachments(Message: types.Message):
-		# Ожидаемый тип значения.
-		ExcpectedValue = BotProcessor.getExpectedType()
-		
-		# Тип сообщения: вложение.
-		if ExcpectedValue == ExpectedMessageTypes.Image:
-			# Сохранение изображения.
-			DownloadImage(Settings["token"], Bot, Message.photo[-1].file_id)
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined) 
 
-	# Обработка изображений (без сжатия).					
-	@Bot.message_handler(content_types=["document"])
-	def MediaAttachments(Message: types.Message):
-		# Ожидаемый тип значения.
-		ExcpectedValue = BotProcessor.getExpectedType()
+#==========================================================================================#
+# >>>>> ОБРАБОТКА ФАЙЛОВ <<<<< #
+#==========================================================================================#
+
+AdminPanel.decorators.files(Bot, Users)
 	
-		# Тип сообщения: вложение.
-		if ExcpectedValue == ExpectedMessageTypes.Image:
-			# Сохранение изображения.
-			DownloadImage(Settings["token"], Bot, Message.document.file_id)
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)				
-		
-	# Запуск обработки запросов Telegram.
-	Bot.infinity_polling(allowed_updates = telebot.util.update_types)
-		
+Bot.infinity_polling()

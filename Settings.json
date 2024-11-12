@@ -1,13 +1,8 @@
 {
-	"token": "",
-	"lib": "g4f",
-	"timezone": "Europe/Moscow",
-	"premium": false,
+	"bot_token": "",
+	"bot_name": "",
+	"language": "ru",
 	"password": "1234",
-	"message": "Здравствуйте!",
-	"collect-media": false,
-	"subscription-notification": "Для использования бота подпишитесь на наши чаты.",
-	"always-check-subscriptions": false,
-	"required-subscriptions": {},
-	"delay": 1
+	"timezone": "Europe/Moscow",
+	"cache_chat_id": null
 }
