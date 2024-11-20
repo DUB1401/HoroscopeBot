@@ -161,7 +161,7 @@ def InlineButton(Call: types.CallbackQuery):
 
 			else:
 				Bot.edit_message_text(
-					text = _("Хорошо! Вы в любой момент сможете посмотреть <b>Гороскоп дня</b>, нажав на кнопку своего знака зодиака 💫"),
+					text = _("Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку своего знака зодиака в меню 💫"),
 					chat_id = User.id,
 					message_id = Call.message.id,
 					parse_mode = "HTML",
@@ -175,7 +175,13 @@ def InlineButton(Call: types.CallbackQuery):
 				Bot.edit_message_text(_("Рассылка отключена."), User.id, Call.message.id, reply_markup = None)
 
 			else:
-				Bot.delete_message(User.id, Call.message.id)
+				Bot.edit_message_text(
+					text = _("Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку своего знака зодиака в меню 💫"),
+					chat_id = User.id,
+					message_id = Call.message.id,
+					parse_mode = "HTML",
+					reply_markup = None
+				)
 
 		case "set":
 			User.set_property("zodiac", Value)

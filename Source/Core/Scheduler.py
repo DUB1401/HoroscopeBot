@@ -28,7 +28,7 @@ class Scheduler:
 		"""Запускает автоматическую генерацию новых гороскопов."""
 
 		self.__Scheduler.add_job(func = self.update_horoscopes, trigger = "cron", minute = "0", hour = "0")
-		self.__Scheduler.add_job(func = self.start_mailing, trigger = "cron", minute = "25", hour = "20")
+		self.__Scheduler.add_job(func = self.start_mailing, trigger = "cron", minute = "0", hour = "8")
 		self.__Scheduler.start()
 
 	def send_horoscope(self, user: UserData, zodiac: Zodiacs):
@@ -49,11 +49,15 @@ class Scheduler:
 		"""Запускает рассылку гороскопов для пользователей."""
 
 		for User in self.__Users.users:
-			Zodiac = User.get_property("zodiac")
 
-			if Zodiac:
-				Zodiac = Zodiacs[Zodiac]
-				self.send_horoscope(User, Zodiac)
+			try:
+				Zodiac = User.get_property("zodiac")
+
+				if Zodiac:
+					Zodiac = Zodiacs[Zodiac]
+					self.send_horoscope(User, Zodiac)
+
+			except: pass
 
 	def update_horoscopes(self):
 		"""Обновляет все гороскопы."""
