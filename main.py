@@ -45,8 +45,8 @@ Cacher.set_options(Bot, Settings["cache_chat_id"])
 
 Horoscopes = Horoscoper(Cacher)
 
-SchedulerObject = Scheduler(Bot, Users, Horoscopes, Settings["timezone"])
-SchedulerObject.update_horoscopes()
+SchedulerObject = Scheduler(Bot, Users, Horoscopes)
+# SchedulerObject.update_horoscopes()
 SchedulerObject.run()
 
 #==========================================================================================#
@@ -115,7 +115,7 @@ def Text(Message: types.Message):
 	if AdminPanel.procedures.text(Bot, User, Message): return
 
 	ErrorMessages = [
-		_("Здравейте, используйте кнопки ниже, для выбора своего знака зодиака"),
+		_("Пожалуйста, используйте кнопки ниже, для выбора своего знака зодиака"),
 		_("Немножко некорректный запрос. Для работы со мной используйте меню внизу)"),
 		_("Не могу обработать эту команду. Буду рад, если вы нажмете на свой знак зодиака"),
 		_("Очень интересно, но, к сожалению, не знаю, что на это ответить. Попробуйте использовать меню внизу)"),

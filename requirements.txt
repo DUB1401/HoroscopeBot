@@ -1,5 +1,4 @@
 pyTelegramBotAPI
 APScheduler
-xlsxwriter
 dublib==0.14.0
-g4f>=0.3.3.2
+g4f==0.3.3.3

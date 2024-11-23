@@ -2,18 +2,18 @@ from Source.Core.Horoscope import Horoscoper, Zodiacs
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from dublib.TelebotUtils import UserData, UsersManager
-from telebot import TeleBot
+from telebot import TeleBot, apihelper
+from time import sleep
 
 class Scheduler:
 	"""Менеджер автоматических задач."""
 
-	def __init__(self, bot: TeleBot, users: UsersManager, horoscoper: Horoscoper, timezone: str = "UTC"):
+	def __init__(self, bot: TeleBot, users: UsersManager, horoscoper: Horoscoper):
 		"""
 		Менеджер автоматических задач.
 			bot – бот Telegram;\n
 			users – менеджер пользователей;\n
-			horoscoper – менеджер гороскопов;\n
-			timezone – часовой пояс.
+			horoscoper – менеджер гороскопов.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -22,13 +22,13 @@ class Scheduler:
 		self.__Users = users
 		self.__Horoscoper = horoscoper
 
-		self.__Scheduler = BackgroundScheduler({"apscheduler.timezone": timezone})
+		self.__Scheduler = BackgroundScheduler()
 
 	def run(self):
 		"""Запускает автоматическую генерацию новых гороскопов."""
 
-		self.__Scheduler.add_job(func = self.update_horoscopes, trigger = "cron", minute = "0", hour = "0")
-		self.__Scheduler.add_job(func = self.start_mailing, trigger = "cron", minute = "0", hour = "8")
+		self.__Scheduler.add_job(func = self.update_horoscopes, trigger = "cron", minute = "0", hour = "0", day = "*")
+		self.__Scheduler.add_job(func = self.start_mailing, trigger = "cron", minute = "0", hour = "8", day = "*")
 		self.__Scheduler.start()
 
 	def send_horoscope(self, user: UserData, zodiac: Zodiacs):
@@ -49,15 +49,18 @@ class Scheduler:
 		"""Запускает рассылку гороскопов для пользователей."""
 
 		for User in self.__Users.users:
-
+			sleep(1)
+			
 			try:
 				Zodiac = User.get_property("zodiac")
 
 				if Zodiac:
 					Zodiac = Zodiacs[Zodiac]
 					self.send_horoscope(User, Zodiac)
+					if User.is_chat_forbidden: User.set_chat_forbidden(False)
 
-			except: pass
+			except KeyError: pass
+			except apihelper.ApiTelegramException: User.set_chat_forbidden(True)
 
 	def update_horoscopes(self):
 		"""Обновляет все гороскопы."""
