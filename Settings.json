@@ -3,5 +3,6 @@
 	"bot_name": "",
 	"language": "ru",
 	"password": "1234",
-	"cache_chat_id": null
+	"cache_chat_id": null,
+	"update_on_restart": false
 }

@@ -2,15 +2,14 @@ from Source.Core.Horoscope import Horoscoper, Zodiacs
 from Source.UI import InlineKeyboards, ReplyKeyboards
 from Source.Core.Scheduler import Scheduler
 from Source.UI.AdminPanel import Panel
+from Source.Core.GetText import _
 
 from dublib.TelebotUtils import TeleCache, TeleMaster, UsersManager
 from dublib.Methods.System import CheckPythonMinimalVersion
 from dublib.Methods.Filesystem import MakeRootDirectories
 from dublib.Methods.JSON import ReadJSON
-from dublib.Polyglot import Markdown
 from telebot import types
 
-import gettext
 import telebot
 import random
 import os
@@ -22,8 +21,6 @@ import os
 CheckPythonMinimalVersion(3, 10)
 MakeRootDirectories(["Data/Horoscopes"])
 
-_ = gettext.gettext
-
 #==========================================================================================#
 # >>>>> ЧТЕНИЕ НАСТРОЕК И СОЗДАНИЕ ОБЪЕКТОВ <<<<< #
 #==========================================================================================#
@@ -31,9 +28,6 @@ _ = gettext.gettext
 Settings = ReadJSON("Settings.json")
 if type(Settings["bot_token"]) != str or Settings["bot_token"].strip() == "": raise Exception("Invalid Telegram bot token.")
 if type(Settings["bot_name"]) == str: Settings["bot_name"] = Settings["bot_name"].strip("\t \n@")
-
-try: gettext.translation("HoroscopeBot", "Locales", languages = [Settings["language"]]).install()
-except FileNotFoundError: pass
 
 Bot = telebot.TeleBot(Settings["bot_token"])
 MasterBot = TeleMaster(Bot)
@@ -46,7 +40,7 @@ Cacher.set_options(Bot, Settings["cache_chat_id"])
 Horoscopes = Horoscoper(Cacher)
 
 SchedulerObject = Scheduler(Bot, Users, Horoscopes)
-# SchedulerObject.update_horoscopes()
+if Settings["update_on_restart"]: SchedulerObject.update_horoscopes()
 SchedulerObject.run()
 
 #==========================================================================================#
@@ -58,11 +52,7 @@ AdminPanel.decorators.commands(Bot, Users, Settings["password"])
 @Bot.message_handler(commands = ["mailset"])
 def Command(Message: types.Message):
 	User = Users.auth(Message.from_user)
-
-	Zodiac = User.get_property("zodiac")
-
-	if Zodiac: Bot.send_message(User.id, _("Желаете выключить ежедневную рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications_disable())
-	else: Bot.send_message(User.id, _("Желаете включить ежедневную рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications_confirm())
+	Bot.send_message(User.id, _("Желаете включить утреннюю рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications())
 
 @Bot.message_handler(commands = ["share"])
 def Command(Message: types.Message):
@@ -147,50 +137,28 @@ AdminPanel.decorators.inline_keyboards(Bot, Users)
 @Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("notifications"))
 def InlineButton(Call: types.CallbackQuery):
 	User = Users.auth(Call.from_user)
-
-	Parameters = Call.data.split("_")
-	Command = Parameters[1]
-	Value = Parameters[2]
+	Command = Call.data.split("_")[-1]
 
 	match Command:
 
-		case "answer":
-
-			if Value == "yes":
-				Bot.edit_message_text(_("Выберите свой знак зодиака из представленного ниже списка:"), User.id, Call.message.id, reply_markup = InlineKeyboards.zodiac_selector())
-
-			else:
-				Bot.edit_message_text(
-					text = _("Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку своего знака зодиака в меню 💫"),
-					chat_id = User.id,
-					message_id = Call.message.id,
-					parse_mode = "HTML",
-					reply_markup = None
-				)
+		case "enable":
+			Bot.edit_message_text(_("Выберите свой знак зодиака из представленного ниже списка:"), User.id, Call.message.id, reply_markup = InlineKeyboards.zodiac_selector())
 
 		case "disable":
+			User.set_property("zodiac", None)
+			Bot.edit_message_text(_("Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку своего знака зодиака в меню 💫"), User.id, Call.message.id, reply_markup = None)
 
-			if Value == "yes":
-				User.set_property("zodiac", None)
-				Bot.edit_message_text(_("Рассылка отключена."), User.id, Call.message.id, reply_markup = None)
-
-			else:
-				Bot.edit_message_text(
-					text = _("Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку своего знака зодиака в меню 💫"),
-					chat_id = User.id,
-					message_id = Call.message.id,
-					parse_mode = "HTML",
-					reply_markup = None
-				)
-
-		case "set":
-			User.set_property("zodiac", Value)
-			Bot.edit_message_text(
-				text = _("Спасибо! Теперь вы будете просыпаться вместе со звездами! ✨️"),
-				chat_id = User.id,
-				message_id = Call.message.id,
-				reply_markup = None
-			)
+@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("select"))
+def InlineButton(Call: types.CallbackQuery):
+	User = Users.auth(Call.from_user)
+	Value = Call.data.split("_")[-1]
+	User.set_property("zodiac", Value)
+	Bot.edit_message_text(
+		text = _("Спасибо! Теперь вы будете просыпаться вместе со звездами! ✨️"),
+		chat_id = User.id,
+		message_id = Call.message.id,
+		reply_markup = None
+	)
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА ФАЙЛОВ <<<<< #

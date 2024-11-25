@@ -1,10 +1,8 @@
+from ..Core.GetText import _
+
 from Source.Core.Horoscope import Zodiacs, ZodiacsSigns
 
 from telebot import types
-
-import gettext
-
-_ = gettext.gettext
 
 class InlineKeyboards:
 	"""Коллекция генераторов Inline-интерфейса."""
@@ -15,23 +13,13 @@ class InlineKeyboards:
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		pass
-
-	def notifications_confirm() -> types.InlineKeyboardMarkup:
-		"""Строит Inline-интерфейс: подтверждение настройки уведомления."""
-
-		Menu = types.InlineKeyboardMarkup()
-		No = types.InlineKeyboardButton(_("Нет"), callback_data = "notifications_answer_no")
-		Yes = types.InlineKeyboardButton(_("Да"), callback_data = "notifications_answer_yes")
-		Menu.add(No, Yes, row_width = 2)
-		
-		return Menu
 	
-	def notifications_disable() -> types.InlineKeyboardMarkup:
+	def notifications() -> types.InlineKeyboardMarkup:
 		"""Строит Inline-интерфейс: подтверждение настройки уведомления."""
 
 		Menu = types.InlineKeyboardMarkup()
-		No = types.InlineKeyboardButton(_("Нет"), callback_data = "notifications_disable_no")
-		Yes = types.InlineKeyboardButton(_("Да"), callback_data = "notifications_disable_yes")
+		No = types.InlineKeyboardButton(_("Нет"), callback_data = "notifications_disable")
+		Yes = types.InlineKeyboardButton(_("Да"), callback_data = "notifications_enable")
 		Menu.add(No, Yes, row_width = 2)
 		
 		return Menu
@@ -43,7 +31,7 @@ class InlineKeyboards:
 		RowButtons = list()
 
 		for Zodiac in ZodiacsSigns: 
-			RowButtons.append(types.InlineKeyboardButton(Zodiac.value + " " + Zodiacs[Zodiac.name].value.title(), callback_data = "notifications_set_" + Zodiacs[Zodiac.name].name))
+			RowButtons.append(types.InlineKeyboardButton(Zodiac.value + " " + Zodiacs[Zodiac.name].value.title(), callback_data = "select_" + Zodiacs[Zodiac.name].name))
 			
 			if len(RowButtons) % 2 == 0:
 				Menu.row(*RowButtons)

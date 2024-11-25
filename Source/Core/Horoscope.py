@@ -1,5 +1,7 @@
-from dublib.CLI.StyledPrinter import StyledPrinter, Styles
+from .GetText import _
+
 from dublib.Methods.Data import RemoveRecurringSubstrings
+from dublib.CLI.TextStyler import Styles, TextStyler
 from dublib.Methods.JSON import ReadJSON, WriteJSON
 from dublib.TelebotUtils.Cache import TeleCache
 from datetime import datetime, date
@@ -10,12 +12,9 @@ from time import sleep
 
 import g4f.Provider
 import dateparser
-import gettext
 import random
 import enum
 import os
-
-_ = gettext.gettext
 
 #==========================================================================================#
 # >>>>> ДОПОЛНИТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
@@ -245,21 +244,23 @@ class Horoscoper:
 					FirstMode = random.choice(Modes)
 					SecondTheme = random.choice(Themes)
 					SecondMode = random.choice(Modes)
-					Request = _("Сгенерируй два абзаца гороскопа на сегодняшний день для: ") + zodiac.value + ". "
+					Request = _("Сгенерируй два абзаца гороскопа на сегодняшний день (не более 900 символов) для: ") + zodiac.value + ". "
 					Request += _("Первый абзац на тему %s имеет %s характер,") % (FirstTheme, FirstMode)
 					Request += " "
 					Request += _("второй абзац на тему %s имеет %s характер.") % (SecondTheme, SecondMode)
 					Request += " "
 					Request += _("Не добавляй разметки и ничего лишнего. В предсказание могут быть включены предостережения, советы, предрекание каких-то интересных встреч, эксклюзивных случаев.")
-
+					
 					Response = self.__Client.chat.completions.create(model = "gpt-4", provider = g4f.Provider.Ai4Chat, messages = [{"role": "user", "content": Request}])
 					Text = Response.choices[0].message.to_json()["content"]
-
+					input(Text)
 					if len(Text.split(" ")) > 30 and len(Text) < 950:
 						self.__Horoscopes[zodiac].set_text(Text)
-						StyledPrinter(f"{zodiac.name} horoscope updated.", text_color = Styles.Colors.Green)
+						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True
 
-					else: sleep(5)
+					else:
+						print(TextStyler("Retrying...").colorize.yellow)
+						sleep(5)
 
-				except Exception as ExceptionData: StyledPrinter(f"Unable to update {zodiac.name} horoscope! Error: {ExceptionData}", text_color = Styles.Colors.Red)
+				except Exception as ExceptionData: TextStyler(f"Unable to update {zodiac.name} horoscope! Error: {ExceptionData}", text_color = Styles.Colors.Red).print()
