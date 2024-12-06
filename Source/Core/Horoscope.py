@@ -253,14 +253,14 @@ class Horoscoper:
 					
 					Response = self.__Client.chat.completions.create(model = "gpt-4", provider = g4f.Provider.Ai4Chat, messages = [{"role": "user", "content": Request}])
 					Text = Response.choices[0].message.to_json()["content"]
-					input(Text)
+
 					if len(Text.split(" ")) > 30 and len(Text) < 950:
 						self.__Horoscopes[zodiac].set_text(Text)
 						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True
 
 					else:
-						print(TextStyler("Retrying...").colorize.yellow)
+						print(TextStyler(f"Retrying {zodiac.name} updating...").colorize.yellow)
 						sleep(5)
 
 				except Exception as ExceptionData: TextStyler(f"Unable to update {zodiac.name} horoscope! Error: {ExceptionData}", text_color = Styles.Colors.Red).print()

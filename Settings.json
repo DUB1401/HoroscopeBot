@@ -1,7 +1,7 @@
 {
-	"bot_token": "",
-	"bot_name": "",
-	"language": "ru",
+	"bot_token": "5909404129:AAHTERiGhaCJ9dL9A-cVH1rYW6tG9klwtuo",
+	"bot_name": "@Astro111_bot",
+	"language": "en",
 	"password": "1234",
 	"cache_chat_id": null,
 	"update_on_restart": false
