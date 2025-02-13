@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-25 16:50+0300\n"
+"POT-Creation-Date: 2025-02-10 19:16+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -20,199 +20,206 @@ msgstr ""
 "X-Poedit-SearchPath-0: main.py\n"
 "X-Poedit-SearchPath-1: Source\n"
 
-#: Source/Core/Horoscope.py:26
+#: Source/Core/Horoscope.py:25
 msgid "овен"
 msgstr ""
 
-#: Source/Core/Horoscope.py:27
+#: Source/Core/Horoscope.py:26
 msgid "телец"
 msgstr ""
 
-#: Source/Core/Horoscope.py:28
+#: Source/Core/Horoscope.py:27
 msgid "близнецы"
 msgstr ""
 
-#: Source/Core/Horoscope.py:29
+#: Source/Core/Horoscope.py:28
 msgid "рак"
 msgstr ""
 
-#: Source/Core/Horoscope.py:30
+#: Source/Core/Horoscope.py:29
 msgid "лев"
 msgstr ""
 
-#: Source/Core/Horoscope.py:31
+#: Source/Core/Horoscope.py:30
 msgid "дева"
 msgstr ""
 
-#: Source/Core/Horoscope.py:32
+#: Source/Core/Horoscope.py:31
 msgid "весы"
 msgstr ""
 
-#: Source/Core/Horoscope.py:33
+#: Source/Core/Horoscope.py:32
 msgid "скорпион"
 msgstr ""
 
-#: Source/Core/Horoscope.py:34
+#: Source/Core/Horoscope.py:33
 msgid "стрелец"
 msgstr ""
 
-#: Source/Core/Horoscope.py:35
+#: Source/Core/Horoscope.py:34
 msgid "козерог"
 msgstr ""
 
-#: Source/Core/Horoscope.py:36
+#: Source/Core/Horoscope.py:35
 msgid "водолей"
 msgstr ""
 
-#: Source/Core/Horoscope.py:37
+#: Source/Core/Horoscope.py:36
 msgid "рыбы"
 msgstr ""
 
-#: Source/Core/Horoscope.py:120
+#: Source/Core/Horoscope.py:119
 msgid "Верь, и все получится!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:121
+#: Source/Core/Horoscope.py:120
 msgid "Вы под защитой неба!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:122
+#: Source/Core/Horoscope.py:121
 msgid "Знай, что магия звёзд работает!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:123
+#: Source/Core/Horoscope.py:122
 msgid "Прекрасного настроения!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:124
+#: Source/Core/Horoscope.py:123
 msgid "Звезды следят за вами!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:125
+#: Source/Core/Horoscope.py:124
 msgid "Удачного вам дня!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:126
+#: Source/Core/Horoscope.py:125
 msgid "Удачного вам сегодня!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:127
+#: Source/Core/Horoscope.py:126
 msgid "Да будет так!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:128
+#: Source/Core/Horoscope.py:127
 msgid "Плодотворного вам дня!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:129
+#: Source/Core/Horoscope.py:128
 msgid "Сделаем этот день вместе!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:130
+#: Source/Core/Horoscope.py:129
 msgid "Сияние планет вам в путь!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:131
+#: Source/Core/Horoscope.py:130
 msgid "Энергия солнца с вами!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:132
+#: Source/Core/Horoscope.py:131
 msgid "Вселенная любит вас!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:133
+#: Source/Core/Horoscope.py:132
 msgid "Звезды сегодня на вашей стороне!"
 msgstr ""
 
-#: Source/Core/Horoscope.py:152
+#: Source/Core/Horoscope.py:151
 msgid "Гороскоп на"
 msgstr ""
 
-#: Source/Core/Horoscope.py:214
+#: Source/Core/Horoscope.py:213
 msgid "общее течение дня"
 msgstr ""
 
-#: Source/Core/Horoscope.py:215
+#: Source/Core/Horoscope.py:214
 msgid "взаимоотношения с людьми"
 msgstr ""
 
-#: Source/Core/Horoscope.py:216
+#: Source/Core/Horoscope.py:215
 msgid "взаимоотношения с близкими"
 msgstr ""
 
-#: Source/Core/Horoscope.py:217
+#: Source/Core/Horoscope.py:216
 msgid "личная жизнь"
 msgstr ""
 
-#: Source/Core/Horoscope.py:218
+#: Source/Core/Horoscope.py:217
 msgid "карьера"
 msgstr ""
 
-#: Source/Core/Horoscope.py:219
+#: Source/Core/Horoscope.py:218
 msgid "финансы"
 msgstr ""
 
-#: Source/Core/Horoscope.py:220
+#: Source/Core/Horoscope.py:219
 msgid "фон настроения"
 msgstr ""
 
-#: Source/Core/Horoscope.py:223 Source/Core/Horoscope.py:224
-#: Source/Core/Horoscope.py:225 Source/Core/Horoscope.py:226
-#: Source/Core/Horoscope.py:227
+#: Source/Core/Horoscope.py:222 Source/Core/Horoscope.py:223
+#: Source/Core/Horoscope.py:224 Source/Core/Horoscope.py:225
+#: Source/Core/Horoscope.py:226
 msgid "нейтральный"
 msgstr ""
 
-#: Source/Core/Horoscope.py:229 Source/Core/Horoscope.py:230
+#: Source/Core/Horoscope.py:228 Source/Core/Horoscope.py:229
 msgid "позитивный"
 msgstr ""
 
-#: Source/Core/Horoscope.py:232 Source/Core/Horoscope.py:233
-#: Source/Core/Horoscope.py:234
+#: Source/Core/Horoscope.py:231 Source/Core/Horoscope.py:232
+#: Source/Core/Horoscope.py:233
 msgid "негативный и позитивный"
 msgstr ""
 
-#: Source/Core/Horoscope.py:247
+#: Source/Core/Horoscope.py:246
 msgid ""
-"Сгенерируй два абзаца гороскопа на сегодняшний день (не более 900 символов) "
-"для: "
+"Сгенерируй два абзаца гороскопа на сегодняшний день (не более 600 символов "
+"в сумме) для: "
 msgstr ""
 
-#: Source/Core/Horoscope.py:248
+#: Source/Core/Horoscope.py:247
 #, python-format
 msgid "Первый абзац на тему %s имеет %s характер,"
 msgstr ""
 
-#: Source/Core/Horoscope.py:250
+#: Source/Core/Horoscope.py:249
 #, python-format
 msgid "второй абзац на тему %s имеет %s характер."
 msgstr ""
 
-#: Source/Core/Horoscope.py:252
+#: Source/Core/Horoscope.py:251
 msgid ""
 "Не добавляй разметки и ничего лишнего. В предсказание могут быть включены "
 "предостережения, советы, предрекание каких-то интересных встреч, "
 "эксклюзивных случаев."
 msgstr ""
 
-#: Source/UI/__init__.py:21
+#: Source/UI/__init__.py:15
 msgid "Нет"
 msgstr ""
 
-#: Source/UI/__init__.py:22
+#: Source/UI/__init__.py:16
 msgid "Да"
 msgstr ""
 
-#: main.py:55
+#: Source/UI/__init__.py:44 main.py:66
+msgid ""
+"<b>🌟 Гороскоп дня</b>\n"
+"Найди свой знак зодиака и узнай, что для тебя на сегодня приготовили "
+"звезды!\n"
+"\n"
+"<b><i>Пользуйся и делись с друзьями!</i></b>"
+msgstr ""
+
+#: Source/UI/__init__.py:45
+msgid "Поделиться"
+msgstr ""
+
+#: main.py:57
 msgid "Желаете включить утреннюю рассылку <b>Гороскопа дня</b>?"
 msgstr ""
 
-#: main.py:67
-msgid ""
-"<b>🌟 Гороскоп дня</b>\n"
-"Найди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!"
-msgstr ""
-
-#: main.py:87
+#: main.py:86
 msgid ""
 "<b>Добро пожаловать в Гороскоп дня!</b>\n"
 "\n"
@@ -221,43 +228,43 @@ msgid ""
 "Выбирай свой знак зодиака и смело начинай этот день!"
 msgstr ""
 
-#: main.py:108
+#: main.py:107
 msgid "Пожалуйста, используйте кнопки ниже, для выбора своего знака зодиака"
 msgstr ""
 
-#: main.py:109
+#: main.py:108
 msgid ""
 "Немножко некорректный запрос. Для работы со мной используйте меню внизу)"
 msgstr ""
 
-#: main.py:110
+#: main.py:109
 msgid ""
 "Не могу обработать эту команду. Буду рад, если вы нажмете на свой знак "
 "зодиака"
 msgstr ""
 
-#: main.py:111
+#: main.py:110
 msgid ""
 "Очень интересно, но, к сожалению, не знаю, что на это ответить. Попробуйте "
 "использовать меню внизу)"
 msgstr ""
 
-#: main.py:112
+#: main.py:111
 msgid ""
 "Это неизвестная для меня команда. Для получения прогноза вам лучше "
 "воспользоваться кнопками ниже"
 msgstr ""
 
-#: main.py:145
+#: main.py:144
 msgid "Выберите свой знак зодиака из представленного ниже списка:"
 msgstr ""
 
-#: main.py:149
+#: main.py:148
 msgid ""
 "Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку "
 "своего знака зодиака в меню 💫"
 msgstr ""
 
-#: main.py:157
+#: main.py:156
 msgid "Спасибо! Теперь вы будете просыпаться вместе со звездами! ✨️"
 msgstr ""

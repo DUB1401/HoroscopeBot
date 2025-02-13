@@ -1,11 +1,10 @@
-from .GetText import _
-
+from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.Methods.Data import RemoveRecurringSubstrings
 from dublib.CLI.TextStyler import Styles, TextStyler
-from dublib.Methods.JSON import ReadJSON, WriteJSON
 from dublib.TelebotUtils.Cache import TeleCache
-from datetime import datetime, date
+from dublib.Engine.GetText import _
 
+from datetime import datetime, date
 from g4f.client import Client
 from telebot import types
 from time import sleep
@@ -244,7 +243,7 @@ class Horoscoper:
 					FirstMode = random.choice(Modes)
 					SecondTheme = random.choice(Themes)
 					SecondMode = random.choice(Modes)
-					Request = _("Сгенерируй два абзаца гороскопа на сегодняшний день (не более 900 символов) для: ") + zodiac.value + ". "
+					Request = _("Сгенерируй два абзаца гороскопа на сегодняшний день (не более 600 символов в сумме) для: ") + zodiac.value + ". "
 					Request += _("Первый абзац на тему %s имеет %s характер,") % (FirstTheme, FirstMode)
 					Request += " "
 					Request += _("второй абзац на тему %s имеет %s характер.") % (SecondTheme, SecondMode)
@@ -254,7 +253,7 @@ class Horoscoper:
 					Response = self.__Client.chat.completions.create(model = "gpt-4", provider = g4f.Provider.Ai4Chat, messages = [{"role": "user", "content": Request}])
 					Text = Response.choices[0].message.to_json()["content"]
 
-					if len(Text.split(" ")) > 30 and len(Text) < 950:
+					if len(Text.split(" ")) > 30 and len(Text) < 700:
 						self.__Horoscopes[zodiac].set_text(Text)
 						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True

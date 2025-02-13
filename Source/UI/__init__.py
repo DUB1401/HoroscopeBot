@@ -1,18 +1,12 @@
-from ..Core.GetText import _
-
 from Source.Core.Horoscope import Zodiacs, ZodiacsSigns
+
+from dublib.Engine.GetText import _
+from dublib.Polyglot import HTML
 
 from telebot import types
 
 class InlineKeyboards:
 	"""Коллекция генераторов Inline-интерфейса."""
-
-	def __init__(self):
-		"""Коллекция генераторов Inline-интерфейса."""
-
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
-		pass
 	
 	def notifications() -> types.InlineKeyboardMarkup:
 		"""Строит Inline-интерфейс: подтверждение настройки уведомления."""
@@ -38,16 +32,23 @@ class InlineKeyboards:
 				RowButtons = list()
 		
 		return Menu
+	
+	def share(self, bot_name: str) -> types.InlineKeyboardMarkup:
+		"""
+		Строит Inline-интерфейс: кнопка поделиться.
+			bot_name – название бота.
+		"""
+
+		Menu = types.InlineKeyboardMarkup()
+		BotNames = f"\n@{bot_name}\n@{bot_name}\n\n"
+		Text = BotNames + HTML(_("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!\n\n<b><i>Пользуйся и делись с друзьями!</i></b>")).plain_text
+		Share = types.InlineKeyboardButton(_("Поделиться"), switch_inline_query = Text)
+		Menu.add(Share)
+
+		return Menu
 
 class ReplyKeyboards:
 	"""Коллекция генераторов Reply-интерфейса."""
-
-	def __init__(self):
-		"""Коллекция генераторов Reply-интерфейса."""
-
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
-		pass
 
 	def zodiac_menu() -> types.ReplyKeyboardMarkup:
 		"""Строит Reply-интерфейс: панель выбора знака зодиака."""

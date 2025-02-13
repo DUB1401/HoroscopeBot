@@ -1,7 +1,8 @@
 from Source.Core.Horoscope import Horoscoper, Zodiacs
 
-from apscheduler.schedulers.background import BackgroundScheduler
 from dublib.TelebotUtils import UserData, UsersManager
+
+from apscheduler.schedulers.background import BackgroundScheduler
 from telebot import TeleBot, apihelper
 from time import sleep
 

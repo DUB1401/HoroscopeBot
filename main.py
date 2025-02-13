@@ -1,13 +1,8 @@
-from Source.Core.Horoscope import Horoscoper, Zodiacs
-from Source.UI import InlineKeyboards, ReplyKeyboards
-from Source.Core.Scheduler import Scheduler
-from Source.UI.AdminPanel import Panel
-from Source.Core.GetText import _
-
+from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.TelebotUtils import TeleCache, TeleMaster, UsersManager
 from dublib.Methods.System import CheckPythonMinimalVersion
-from dublib.Methods.Filesystem import MakeRootDirectories
-from dublib.Methods.JSON import ReadJSON
+from dublib.Engine.GetText import GetText
+
 from telebot import types
 
 import telebot
@@ -27,7 +22,14 @@ MakeRootDirectories(["Data/Horoscopes"])
 
 Settings = ReadJSON("Settings.json")
 if type(Settings["bot_token"]) != str or Settings["bot_token"].strip() == "": raise Exception("Invalid Telegram bot token.")
-if type(Settings["bot_name"]) == str: Settings["bot_name"] = Settings["bot_name"].strip("\t \n@")
+
+GetText.initialize("HoroscopeBot", Settings["language"])
+_ = GetText.gettext
+
+from Source.Core.Horoscope import Horoscoper, Zodiacs
+from Source.UI import InlineKeyboards, ReplyKeyboards
+from Source.UI.TeleBotAdminPanel import Panel
+from Source.Core.Scheduler import Scheduler
 
 Bot = telebot.TeleBot(Settings["bot_token"])
 MasterBot = TeleMaster(Bot)
@@ -49,7 +51,7 @@ SchedulerObject.run()
 
 AdminPanel.decorators.commands(Bot, Users, Settings["password"])
 
-@Bot.message_handler(commands = ["mailset"])
+@Bot.message_handler(commands = ["mailing", "mailset"])
 def Command(Message: types.Message):
 	User = Users.auth(Message.from_user)
 	Bot.send_message(User.id, _("Желаете включить утреннюю рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications())
@@ -59,12 +61,9 @@ def Command(Message: types.Message):
 	User = Users.auth(Message.from_user)
 	
 	QrPath = "Data/Images/qr.jpg"
-	BotName = Settings["bot_name"]
-
-	if BotName: BotName = f"@{BotName}\n@{BotName}\n@{BotName}\n\n"
-	else: BotName = ""
-
-	Caption = BotName + _("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!")
+	BotName = Bot.get_me().username
+	BotNames = f"@{BotName}\n@{BotName}\n@{BotName}\n\n"
+	Caption = BotNames + _("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!\n\n<b><i>Пользуйся и делись с друзьями!</i></b>")
 
 	if os.path.exists(QrPath):
 		FileID = None
@@ -72,7 +71,7 @@ def Command(Message: types.Message):
 		try: FileID = Cacher[QrPath]
 		except KeyError: FileID = Cacher.upload_file(QrPath, types.InputMediaPhoto).id
 
-		Bot.send_photo(User.id, FileID, Caption, parse_mode = "HTML")
+		Bot.send_photo(User.id, FileID, Caption, parse_mode = "HTML", reply_markup = InlineKeyboards().share(BotName))
 
 	else:
 		Bot.send_message(User.id, Caption, parse_mode = "HTML")

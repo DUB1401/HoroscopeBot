@@ -1,4 +1,5 @@
+-r Source/UI/TeleBotAdminPanel/requirements.txt
 pyTelegramBotAPI
 APScheduler
-dublib==0.14.1
+dublib==0.16.2
 g4f==0.3.3.3
