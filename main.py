@@ -21,7 +21,6 @@ MakeRootDirectories(["Data/Horoscopes"])
 #==========================================================================================#
 
 Settings = ReadJSON("Settings.json")
-if type(Settings["bot_token"]) != str or Settings["bot_token"].strip() == "": raise Exception("Invalid Telegram bot token.")
 
 GetText.initialize("HoroscopeBot", Settings["language"])
 _ = GetText.gettext

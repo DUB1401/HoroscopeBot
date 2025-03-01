@@ -250,9 +250,9 @@ class Horoscoper:
 					Request += " "
 					Request += _("Не добавляй разметки и ничего лишнего. В предсказание могут быть включены предостережения, советы, предрекание каких-то интересных встреч, эксклюзивных случаев.")
 					
-					Response = self.__Client.chat.completions.create(model = "gpt-4", provider = g4f.Provider.Ai4Chat, messages = [{"role": "user", "content": Request}])
-					Text = Response.choices[0].message.to_json()["content"]
-
+					Response = self.__Client.chat.completions.create(model = "gpt-4", provider = g4f.Provider.DDG, messages = [{"role": "user", "content": Request}])
+					Text = Response.choices[0].message.content
+					
 					if len(Text.split(" ")) > 30 and len(Text) < 700:
 						self.__Horoscopes[zodiac].set_text(Text)
 						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)

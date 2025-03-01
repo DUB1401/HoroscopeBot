@@ -1,6 +1,6 @@
 {
 	"bot_token": "",
-	"language": "en",
+	"language": "ru",
 	"password": "1234",
 	"cache_chat_id": null,
 	"update_on_restart": false
