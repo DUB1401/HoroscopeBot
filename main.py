@@ -53,7 +53,7 @@ AdminPanel.decorators.commands(Bot, Users, Settings["password"])
 @Bot.message_handler(commands = ["mailing", "mailset"])
 def Command(Message: types.Message):
 	User = Users.auth(Message.from_user)
-	Bot.send_message(User.id, _("Желаете включить утреннюю рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications())
+	Bot.send_message(User.id, _("Желаете настроить/отключить утреннюю рассылку <b>Гороскопа дня</b>?"), parse_mode = "HTML", reply_markup = InlineKeyboards.notifications())
 
 @Bot.message_handler(commands = ["share"])
 def Command(Message: types.Message):
@@ -125,6 +125,10 @@ def Text(Message: types.Message):
 	
 	Zodiac = Zodiacs(Zodiac)
 	SchedulerObject.send_horoscope(User, Zodiac)
+
+	if User.has_property("is_first") and User.get_property("is_first") or not User.has_property("is_first"):
+		User.set_property("zodiac", Zodiac.name)
+		User.set_property("is_first", False)
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА INLINE-КНОПОК <<<<< #

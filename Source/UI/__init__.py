@@ -12,8 +12,8 @@ class InlineKeyboards:
 		"""Строит Inline-интерфейс: подтверждение настройки уведомления."""
 
 		Menu = types.InlineKeyboardMarkup()
-		No = types.InlineKeyboardButton(_("Нет"), callback_data = "notifications_disable")
-		Yes = types.InlineKeyboardButton(_("Да"), callback_data = "notifications_enable")
+		No = types.InlineKeyboardButton(_("Отключить") + " ❌️", callback_data = "notifications_disable")
+		Yes = types.InlineKeyboardButton(_("Настроить") + " ✅", callback_data = "notifications_enable")
 		Menu.add(No, Yes, row_width = 2)
 		
 		return Menu
