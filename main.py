@@ -136,6 +136,10 @@ def Text(Message: types.Message):
 
 AdminPanel.decorators.inline_keyboards(Bot, Users)
 
+@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("delete"))
+def InlineButton(Call: types.CallbackQuery):
+	Bot.delete_message(Call.message.chat.id, Call.message.id)
+
 @Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("notifications"))
 def InlineButton(Call: types.CallbackQuery):
 	User = Users.auth(Call.from_user)
@@ -144,11 +148,16 @@ def InlineButton(Call: types.CallbackQuery):
 	match Command:
 
 		case "enable":
-			Bot.edit_message_text(_("Выберите свой знак зодиака из представленного ниже списка:"), User.id, Call.message.id, reply_markup = InlineKeyboards.zodiac_selector())
+			Bot.edit_message_text(_("Выберите свой знак зодиака из представленного списка ниже:"), User.id, Call.message.id, reply_markup = InlineKeyboards.zodiac_selector())
 
 		case "disable":
 			User.set_property("zodiac", None)
-			Bot.edit_message_text(_("Хорошо! Вы в любой момент сможете посмотреть предсказания, нажав на кнопку своего знака зодиака в меню 💫"), User.id, Call.message.id, reply_markup = None)
+			Bot.edit_message_text(
+				text = _("Хорошо! Вы в любой момент сможете посмотреть предсказания, выбрав свой знак зодиака из меню ниже 💫"),
+				chat_id = User.id,
+				message_id = Call.message.id,
+				reply_markup = InlineKeyboards.delete(_("Благодарю!"))
+			)
 
 @Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("select"))
 def InlineButton(Call: types.CallbackQuery):
@@ -159,7 +168,7 @@ def InlineButton(Call: types.CallbackQuery):
 		text = _("Спасибо! Теперь вы будете просыпаться вместе со звездами! ✨️"),
 		chat_id = User.id,
 		message_id = Call.message.id,
-		reply_markup = None
+		reply_markup = InlineKeyboards.delete(_("Хотелось бы!"))
 	)
 
 #==========================================================================================#

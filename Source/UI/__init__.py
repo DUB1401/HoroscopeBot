@@ -8,6 +8,14 @@ from telebot import types
 class InlineKeyboards:
 	"""Коллекция генераторов Inline-интерфейса."""
 	
+	def delete(label: str) -> types.InlineKeyboardMarkup:
+		"""Строит Inline-интерфейс: панель выбора знака зодиака."""
+
+		Menu = types.InlineKeyboardMarkup()
+		Menu.add(types.InlineKeyboardButton(label, callback_data = "delete"))
+
+		return Menu
+
 	def notifications() -> types.InlineKeyboardMarkup:
 		"""Строит Inline-интерфейс: подтверждение настройки уведомления."""
 
@@ -16,6 +24,20 @@ class InlineKeyboards:
 		Yes = types.InlineKeyboardButton(_("Настроить") + " ✅", callback_data = "notifications_enable")
 		Menu.add(No, Yes, row_width = 2)
 		
+		return Menu
+
+	def share(self, bot_name: str) -> types.InlineKeyboardMarkup:
+		"""
+		Строит Inline-интерфейс: кнопка поделиться.
+			bot_name – название бота.
+		"""
+
+		Menu = types.InlineKeyboardMarkup()
+		BotNames = f"\n@{bot_name}\n@{bot_name}\n\n"
+		Text = BotNames + HTML(_("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!\n\n<b><i>Пользуйся и делись с друзьями!</i></b>")).plain_text
+		Share = types.InlineKeyboardButton(_("Поделиться"), switch_inline_query = Text)
+		Menu.add(Share)
+
 		return Menu
 
 	def zodiac_selector() -> types.InlineKeyboardMarkup:
@@ -31,20 +53,6 @@ class InlineKeyboards:
 				Menu.row(*RowButtons)
 				RowButtons = list()
 		
-		return Menu
-	
-	def share(self, bot_name: str) -> types.InlineKeyboardMarkup:
-		"""
-		Строит Inline-интерфейс: кнопка поделиться.
-			bot_name – название бота.
-		"""
-
-		Menu = types.InlineKeyboardMarkup()
-		BotNames = f"\n@{bot_name}\n@{bot_name}\n\n"
-		Text = BotNames + HTML(_("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!\n\n<b><i>Пользуйся и делись с друзьями!</i></b>")).plain_text
-		Share = types.InlineKeyboardButton(_("Поделиться"), switch_inline_query = Text)
-		Menu.add(Share)
-
 		return Menu
 
 class ReplyKeyboards:
