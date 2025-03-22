@@ -5,5 +5,8 @@ __pycache__
 Data/Horoscopes.json
 Data/Images/qr.jpg
 Data/Horoscopes
-TeleCache.json
 Data/Users
+# Files cache.
+.telecache.json
+# g4f cookies.
+har_and_cookies

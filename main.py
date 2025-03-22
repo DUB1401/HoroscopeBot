@@ -2,6 +2,7 @@ from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.TelebotUtils import TeleCache, TeleMaster, UsersManager
 from dublib.Methods.System import CheckPythonMinimalVersion
 from dublib.Engine.GetText import GetText
+from dublib.Methods.System import Clear
 
 from telebot import types
 
@@ -15,6 +16,7 @@ import os
 
 CheckPythonMinimalVersion(3, 10)
 MakeRootDirectories(["Data/Horoscopes"])
+Clear()
 
 #==========================================================================================#
 # >>>>> ЧТЕНИЕ НАСТРОЕК И СОЗДАНИЕ ОБЪЕКТОВ <<<<< #
@@ -35,10 +37,10 @@ MasterBot = TeleMaster(Bot)
 Users = UsersManager("Data/Users")
 AdminPanel = Panel()
 
-Cacher = TeleCache("TeleCache.json")
+Cacher = TeleCache()
 Cacher.set_options(Bot, Settings["cache_chat_id"])
 
-Horoscopes = Horoscoper(Cacher)
+Horoscopes = Horoscoper(Cacher, Settings)
 
 SchedulerObject = Scheduler(Bot, Users, Horoscopes)
 if Settings["update_on_restart"]: SchedulerObject.update_horoscopes()

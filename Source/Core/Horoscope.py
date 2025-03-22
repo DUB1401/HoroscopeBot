@@ -9,11 +9,11 @@ from g4f.client import Client
 from telebot import types
 from time import sleep
 
-import g4f.Provider
 import dateparser
 import random
 import enum
 import os
+import re
 
 #==========================================================================================#
 # >>>>> ДОПОЛНИТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
@@ -162,16 +162,29 @@ class Horoscope:
 class Horoscoper:
 	"""Генератор гороскопов."""
 
-	def __init__(self, cache: TeleCache):
+	def __IsTextValid(self, text: str) -> bool:
+		"""
+		Проверяет валидность текста на основе регулярного выражения, исключающего латиницу и иные не кирилические символы.
+		  text – проверяемый текст.
+		"""
+
+		if self.__Settings["language"] not in ("ru", "rus"): return True
+
+		text = str(text)
+
+		return bool(re.match(r"^[А-Яа-яЁё\s.,:;!?()\-\–«»\"\'\[\]{}]+$", text, re.IGNORECASE))
+
+	def __init__(self, cache: TeleCache, settings: dict):
 		"""
 		Генератор гороскопов.
-			bot – бот Telegram;\n
-			cache_chat_id – ID чата для отправки кэша.
+			cache – ID чата для отправки кэша;\n
+			settings – глобальные настройки.
 		"""
 
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		self.__Cache = cache
+		self.__Settings = settings
 
 		self.__Horoscopes: dict[Zodiacs, Horoscope] = dict()
 		self.__Client = Client()
@@ -194,11 +207,9 @@ class Horoscoper:
 
 		ZodiacName = zodiac.name.lower()
 		Path = f"Data/Images/{ZodiacName}.jpg"
+		CachedFile = self.__Cache.get_real_cached_file(Path, types.InputMediaPhoto)
 
-		try: self.__Cache[Path]
-		except KeyError: self.__Cache.upload_file(Path, types.InputMediaPhoto)
-
-		return self.__Cache.get_cached_file(Path).id
+		return CachedFile.file_id
 
 	def update(self, zodiac: Zodiacs, force: bool = False):
 		"""
@@ -250,10 +261,10 @@ class Horoscoper:
 					Request += " "
 					Request += _("Не добавляй разметки и ничего лишнего. В предсказание могут быть включены предостережения, советы, предрекание каких-то интересных встреч, эксклюзивных случаев.")
 					
-					Response = self.__Client.chat.completions.create(model = "gpt-4", provider = g4f.Provider.DDG, messages = [{"role": "user", "content": Request}])
+					Response = self.__Client.chat.completions.create(model = "gpt-4o", messages = [{"role": "user", "content": Request}])
 					Text = Response.choices[0].message.content
 					
-					if len(Text.split(" ")) > 30 and len(Text) < 700:
+					if len(Text.split(" ")) > 30 and len(Text) < 700 and self.__IsTextValid(Text):
 						self.__Horoscopes[zodiac].set_text(Text)
 						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True
