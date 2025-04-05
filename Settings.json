@@ -3,5 +3,6 @@
 	"language": "ru",
 	"password": "1234",
 	"cache_chat_id": null,
+	"enable_notifications_after_first_use": false,
 	"update_on_restart": false
 }

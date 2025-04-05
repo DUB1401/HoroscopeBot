@@ -4,6 +4,7 @@ from dublib.Methods.System import CheckPythonMinimalVersion
 from dublib.Engine.GetText import GetText
 from dublib.Methods.System import Clear
 
+from threading import Thread
 from telebot import types
 
 import telebot
@@ -43,7 +44,7 @@ Cacher.set_options(Bot, Settings["cache_chat_id"])
 Horoscopes = Horoscoper(Cacher, Settings)
 
 SchedulerObject = Scheduler(Bot, Users, Horoscopes)
-if Settings["update_on_restart"]: SchedulerObject.update_horoscopes()
+if Settings["update_on_restart"]: Thread(target = SchedulerObject.update_horoscopes).start()
 SchedulerObject.run()
 
 #==========================================================================================#
@@ -67,11 +68,7 @@ def Command(Message: types.Message):
 	Caption = BotNames + _("<b>🌟 Гороскоп дня</b>\nНайди свой знак зодиака и узнай, что для тебя на сегодня приготовили звезды!\n\n<b><i>Пользуйся и делись с друзьями!</i></b>")
 
 	if os.path.exists(QrPath):
-		FileID = None
-
-		try: FileID = Cacher[QrPath]
-		except KeyError: FileID = Cacher.upload_file(QrPath, types.InputMediaPhoto).id
-
+		FileID = Cacher.get_real_cached_file(QrPath, types.InputMediaPhoto).file_id
 		Bot.send_photo(User.id, FileID, Caption, parse_mode = "HTML", reply_markup = InlineKeyboards().share(BotName))
 
 	else:
@@ -103,6 +100,7 @@ AdminPanel.decorators.reply_keyboards(Bot, Users)
 def Text(Message: types.Message):
 	User = Users.auth(Message.from_user)
 	if AdminPanel.procedures.text(Bot, User, Message): return
+	Bot.send_chat_action(User.id, "typing")
 
 	ErrorMessages = [
 		_("Пожалуйста, используйте кнопки ниже, для выбора своего знака зодиака"),
@@ -128,8 +126,8 @@ def Text(Message: types.Message):
 	Zodiac = Zodiacs(Zodiac)
 	SchedulerObject.send_horoscope(User, Zodiac)
 
-	if User.has_property("is_first") and User.get_property("is_first") or not User.has_property("is_first"):
-		User.set_property("zodiac", Zodiac.name)
+	if Settings["enable_notifications_after_first_use"]:
+		if User.has_property("is_first") and User.get_property("is_first"): User.set_property("zodiac", Zodiac.name)
 		User.set_property("is_first", False)
 
 #==========================================================================================#

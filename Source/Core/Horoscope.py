@@ -254,7 +254,7 @@ class Horoscoper:
 					FirstMode = random.choice(Modes)
 					SecondTheme = random.choice(Themes)
 					SecondMode = random.choice(Modes)
-					Request = _("Сгенерируй два абзаца гороскопа на сегодняшний день (не более 600 символов в сумме) для: ") + zodiac.value + ". "
+					Request = _("Сгенерируй два абзаца гороскопа на сегодняшний день (не более 450 символов в сумме) для: ") + zodiac.value + ". "
 					Request += _("Первый абзац на тему %s имеет %s характер,") % (FirstTheme, FirstMode)
 					Request += " "
 					Request += _("второй абзац на тему %s имеет %s характер.") % (SecondTheme, SecondMode)
@@ -264,7 +264,7 @@ class Horoscoper:
 					Response = self.__Client.chat.completions.create(model = "gpt-4o", messages = [{"role": "user", "content": Request}])
 					Text = Response.choices[0].message.content
 					
-					if len(Text.split(" ")) > 30 and len(Text) < 700 and self.__IsTextValid(Text):
+					if len(Text.split(" ")) > 30 and len(Text) < 500 and self.__IsTextValid(Text):
 						self.__Horoscopes[zodiac].set_text(Text)
 						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True
