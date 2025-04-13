@@ -1,3 +1,5 @@
+import Source.UI.AdditionalColumns
+
 from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.TelebotUtils import TeleCache, TeleMaster, UsersManager
 from dublib.Methods.System import CheckPythonMinimalVersion
@@ -5,11 +7,11 @@ from dublib.Engine.GetText import GetText
 from dublib.Methods.System import Clear
 
 from threading import Thread
-from telebot import types
-
-import telebot
 import random
 import os
+
+from telebot import types
+import telebot
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СКРИПТА <<<<< #
