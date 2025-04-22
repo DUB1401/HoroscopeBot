@@ -220,16 +220,19 @@ class Horoscoper:
 
 		Today = datetime.today().date()
 		Horoscope = self.__Horoscopes[zodiac]
-		Themes = [
+		Themes = (
 			_("общее течение дня"),
 			_("взаимоотношения с людьми"),
-			_("взаимоотношения с близкими"),
 			_("личная жизнь"),
 			_("карьера"),
 			_("финансы"),
-			_("фон настроения")
-		]
-		Modes = [
+			_("фон настроения"),
+			_("предостережение"),
+			_("совет"),
+			_("яркое событие"),
+			_("уникальный случай"),
+		)
+		Modes = (
 			_("нейтральный"),
 			_("нейтральный"),
 			_("нейтральный"),
@@ -242,7 +245,7 @@ class Horoscoper:
 			_("негативный и позитивный"),
 			_("негативный и позитивный"),
 			_("негативный и позитивный")
-		]
+		)
 
 		if not Horoscope.text or Horoscope.date != Today or force:
 			Updated = False
@@ -259,12 +262,12 @@ class Horoscoper:
 					Request += " "
 					Request += _("второй абзац на тему %s имеет %s характер.") % (SecondTheme, SecondMode)
 					Request += " "
-					Request += _("Не добавляй разметки и ничего лишнего. В предсказание могут быть включены предостережения, советы, предрекание каких-то интересных встреч, эксклюзивных случаев.")
+					Request += _("Не добавляй разметки и ничего лишнего.")
 					
 					Response = self.__Client.chat.completions.create(model = "gpt-4o", messages = [{"role": "user", "content": Request}])
 					Text = Response.choices[0].message.content
 					
-					if len(Text.split(" ")) > 30 and len(Text) < 500 and self.__IsTextValid(Text):
+					if len(Text.split(" ")) > 30 and len(Text) < 500 and self.__IsTextValid(Text) and "\n" in Text:
 						self.__Horoscopes[zodiac].set_text(Text)
 						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True

@@ -1,5 +1,3 @@
-import Source.UI.AdditionalColumns
-
 from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.TelebotUtils import TeleCache, TeleMaster, UsersManager
 from dublib.Methods.System import CheckPythonMinimalVersion
@@ -34,6 +32,7 @@ from Source.Core.Horoscope import Horoscoper, Zodiacs
 from Source.UI import InlineKeyboards, ReplyKeyboards
 from Source.UI.TeleBotAdminPanel import Panel
 from Source.Core.Scheduler import Scheduler
+import Source.UI.AdditionalColumns
 
 Bot = telebot.TeleBot(Settings["bot_token"])
 MasterBot = TeleMaster(Bot)
