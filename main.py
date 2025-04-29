@@ -88,19 +88,13 @@ def Command(Message: types.Message):
 	)
 
 #==========================================================================================#
-# >>>>> ОБРАБОТКА REPLY-КНОПОК <<<<< #
-#==========================================================================================#
-
-AdminPanel.decorators.reply_keyboards(Bot, Users)
-
-#==========================================================================================#
 # >>>>> ОБРАБОТКА ВВОДА ТЕКСТА <<<<< #
 #==========================================================================================#
 
 @Bot.message_handler(content_types = ["text"])
 def Text(Message: types.Message):
 	User = Users.auth(Message.from_user)
-	if AdminPanel.procedures.text(Bot, User, Message): return
+	if AdminPanel.procedures.text(Bot, Users, Message): return
 	Bot.send_chat_action(User.id, "typing")
 
 	ErrorMessages = [
