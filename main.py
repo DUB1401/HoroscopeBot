@@ -8,8 +8,7 @@ from threading import Thread
 import random
 import os
 
-from telebot import types
-import telebot
+from telebot import TeleBot, types
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СКРИПТА <<<<< #
@@ -24,7 +23,6 @@ Clear()
 #==========================================================================================#
 
 Settings = ReadJSON("Settings.json")
-
 GetText.initialize("HoroscopeBot", Settings["language"])
 _ = GetText.gettext
 
@@ -34,10 +32,10 @@ from Source.UI.TeleBotAdminPanel import Panel
 from Source.Core.Scheduler import Scheduler
 import Source.UI.AdditionalColumns
 
-Bot = telebot.TeleBot(Settings["bot_token"])
+Bot = TeleBot(Settings["bot_token"])
 MasterBot = TeleMaster(Bot)
 Users = UsersManager("Data/Users")
-AdminPanel = Panel()
+AdminPanel = Panel(Bot, Users, Settings["password"])
 
 Cacher = TeleCache()
 Cacher.set_options(Bot, Settings["cache_chat_id"])
@@ -48,11 +46,19 @@ SchedulerObject = Scheduler(Bot, Users, Horoscopes)
 if Settings["update_on_restart"]: Thread(target = SchedulerObject.update_horoscopes).start()
 SchedulerObject.run()
 
+for CurrentUser in Users.users:
+	Data = Bot.get_chat(CurrentUser.id)
+	NameParts = list()
+	if Data.first_name: NameParts.append(Data.first_name)
+	if Data.last_name: NameParts.append(Data.last_name)
+	Name = " ".join(NameParts)
+	if Name: CurrentUser.set_property("name", Name)
+
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОММАНД <<<<< #
 #==========================================================================================#
 
-AdminPanel.decorators.commands(Bot, Users, Settings["password"])
+AdminPanel.decorators.commands()
 
 @Bot.message_handler(commands = ["mailing", "mailset"])
 def Command(Message: types.Message):
@@ -129,7 +135,7 @@ def Text(Message: types.Message):
 # >>>>> ОБРАБОТКА INLINE-КНОПОК <<<<< #
 #==========================================================================================#
 
-AdminPanel.decorators.inline_keyboards(Bot, Users)
+AdminPanel.decorators.inline_keyboards()
 
 @Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("delete"))
 def InlineButton(Call: types.CallbackQuery):
@@ -170,6 +176,6 @@ def InlineButton(Call: types.CallbackQuery):
 # >>>>> ОБРАБОТКА ФАЙЛОВ <<<<< #
 #==========================================================================================#
 
-AdminPanel.decorators.files(Bot, Users)
+AdminPanel.decorators.files()
 	
 Bot.infinity_polling()

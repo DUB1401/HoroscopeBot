@@ -17,8 +17,6 @@ class Scheduler:
 			horoscoper – менеджер гороскопов.
 		"""
 
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
 		self.__Bot = bot
 		self.__Users = users
 		self.__Horoscoper = horoscoper
@@ -44,7 +42,7 @@ class Scheduler:
 		Caption = self.__Horoscoper.get_horoscope(zodiac).text
 
 		try: self.__Bot.send_photo(user.id, Image, Caption, parse_mode = "HTML")
-		except ZeroDivisionError: user.set_chat_forbidden(True)
+		except: user.set_chat_forbidden(True)
 
 	def start_mailing(self):
 		"""Запускает рассылку гороскопов для пользователей."""

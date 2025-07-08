@@ -1,6 +1,6 @@
 from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.Methods.Data import RemoveRecurringSubstrings
-from dublib.CLI.TextStyler import Styles, TextStyler
+from dublib.CLI.TextStyler.FastStyler import FastStyler
 from dublib.TelebotUtils.Cache import TeleCache
 from dublib.Engine.GetText import _
 
@@ -80,13 +80,11 @@ class Horoscope:
 			zodiac – знак зодиака.
 		"""
 
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
 		self.__Zodiac = zodiac
 
 		self.__Text = None
 		self.__Date = datetime.today().date()
-		self.__Path = Path = f"Data/Horoscopes/{zodiac.name}.json"
+		self.__Path = f"Data/Horoscopes/{zodiac.name}.json"
 		
 		self.read(exception = False)
 
@@ -181,8 +179,6 @@ class Horoscoper:
 			settings – глобальные настройки.
 		"""
 
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
 		self.__Cache = cache
 		self.__Settings = settings
 
@@ -265,15 +261,15 @@ class Horoscoper:
 					Request += _("Не добавляй разметки и ничего лишнего.")
 					
 					Response = self.__Client.chat.completions.create(model = "gpt-4o", messages = [{"role": "user", "content": Request}])
-					Text = Response.choices[0].message.content
+					Text: str = Response.choices[0].message.content
 					
 					if len(Text.split(" ")) > 30 and len(Text) < 500 and self.__IsTextValid(Text) and "\n" in Text:
 						self.__Horoscopes[zodiac].set_text(Text)
-						print(TextStyler(f"{zodiac.name} horoscope updated.").colorize.green)
+						print(FastStyler(f"{zodiac.name} horoscope updated.").colorize.green)
 						Updated = True
 
 					else:
-						print(TextStyler(f"Retrying {zodiac.name} updating...").colorize.yellow)
+						print(FastStyler(f"Retrying {zodiac.name} updating...").colorize.yellow)
 						sleep(5)
 
-				except Exception as ExceptionData: TextStyler(f"Unable to update {zodiac.name} horoscope! Error: {ExceptionData}", text_color = Styles.Colors.Red).print()
+				except Exception as ExceptionData: print(FastStyler(f"Unable to update {zodiac.name} horoscope! Error: {ExceptionData}").colorize.red)

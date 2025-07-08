@@ -1,11 +1,10 @@
 # Python virtual enviroment and cache.
 __pycache__
 .venv
-# Bot data.
-Data/Horoscopes.json
-Data/Images/qr.jpg
-Data/Horoscopes
-Data/Users
+# Bot data (exclude images).
+Data/*/
+!Data/Images/
+!Data/Images/*
 # Files cache.
 .telecache.json
 # g4f cookies.

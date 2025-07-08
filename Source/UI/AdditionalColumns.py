@@ -1,5 +1,5 @@
 
-from Source.UI.TeleBotAdminPanel.Extractor import Extractor, CellData
+from Source.UI.TeleBotAdminPanel.Core.Extractor import Extractor, CellData
 
 from dublib.TelebotUtils import UserData
 
