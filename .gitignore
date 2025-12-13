@@ -5,6 +5,7 @@ __pycache__
 Data/*/
 !Data/Images/
 !Data/Images/*
+.tbap
 # Files cache.
 .telecache.json
 # g4f cookies.

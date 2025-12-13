@@ -28,17 +28,30 @@ _ = GetText.gettext
 
 from Source.Core.Horoscope import Horoscoper, Zodiacs
 from Source.UI import InlineKeyboards, ReplyKeyboards
-from Source.UI.TeleBotAdminPanel import Panel
+from Source.TeleBotAdminPanel import Panel, Modules
 from Source.Core.Scheduler import Scheduler
-import Source.UI.AdditionalColumns
+from Source import PanelAdditional
 
 Bot = TeleBot(Settings["bot_token"])
 MasterBot = TeleMaster(Bot)
 Users = UsersManager("Data/Users")
+
 AdminPanel = Panel(Bot, Users, Settings["password"])
 
+TBAP_TREE = {
+	"📊 Статистика": Modules.SM_Statistics,
+	"❌ Закрыть": Modules.SM_Close
+}
+
+AdminPanel.set_tree(TBAP_TREE)
+AdminPanel.set_close_callback(PanelAdditional.close_callback, (Bot,))
+
+SM_Statistics: Modules.SM_Statistics = AdminPanel.get_module_object(Modules.SM_Statistics.__name__)
+SM_Statistics.columns["Zodiac"] = PanelAdditional.get_zodiac
+
 Cacher = TeleCache()
-Cacher.set_options(Bot, Settings["cache_chat_id"])
+Cacher.set_bot(Bot)
+Cacher.set_chat_id(Settings["cache_chat_id"])
 
 Horoscopes = Horoscoper(Cacher, Settings)
 
@@ -58,7 +71,10 @@ for CurrentUser in Users.users:
 # >>>>> ОБРАБОТКА КОММАНД <<<<< #
 #==========================================================================================#
 
-AdminPanel.decorators.commands()
+@Bot.message_handler(commands = ["admin"])
+def Command(Message: types.Message):
+	User = Users.auth(Message.from_user)
+	AdminPanel.open(User, "Панель управления открыта.")
 
 @Bot.message_handler(commands = ["mailing", "mailset"])
 def Command(Message: types.Message):
@@ -100,7 +116,7 @@ def Command(Message: types.Message):
 @Bot.message_handler(content_types = ["text"])
 def Text(Message: types.Message):
 	User = Users.auth(Message.from_user)
-	if AdminPanel.procedures.text(Bot, Users, Message): return
+	if AdminPanel.procedures.text(Message): return
 	Bot.send_chat_action(User.id, "typing")
 
 	ErrorMessages = [
@@ -171,11 +187,5 @@ def InlineButton(Call: types.CallbackQuery):
 		message_id = Call.message.id,
 		reply_markup = InlineKeyboards.delete(_("Хотелось бы!"))
 	)
-
-#==========================================================================================#
-# >>>>> ОБРАБОТКА ФАЙЛОВ <<<<< #
-#==========================================================================================#
-
-AdminPanel.decorators.files()
 	
 Bot.infinity_polling()
